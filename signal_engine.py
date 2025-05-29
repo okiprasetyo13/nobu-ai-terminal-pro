@@ -92,12 +92,15 @@ def get_support_resistance(df):
 
 def determine_strategy_and_advice(latest, signal, support):
     if signal == "BUY":
-        strategy = "Scalping"
-        advice = "Entry near support. Set SL & TP carefully."
+        if latest['RSI'] < 30:
+            advice = "Oversold bounce expected. Enter near support. SL tight."
+        else:
+            advice = "Uptrend detected. Buy momentum continuation."
+        strategy = "Scalping" if latest['EMA9'] > latest['EMA21'] else "Long"
     elif signal == "SELL":
+        advice = "Overbought condition. Consider shorting or exiting."
         strategy = "Short"
-        advice = "Market looks overbought. Short with caution."
     else:
+        advice = "No setup now. Monitor closely for breakout/retest."
         strategy = "Wait"
-        advice = "No clear setup. Wait for better opportunity."
     return strategy, advice
