@@ -1,3 +1,17 @@
+import pandas as pd
+
+def get_ready_to_trade_data():
+    """
+    Returns a filtered list of top trading opportunities based on scalping signals.
+    This is used for the 'Ready to Trade' panel in the app.
+    """
+    # Placeholder sample data – replace with actual logic as needed
+    data = [
+        {"Symbol": "BTC", "Strategy": "Scalping", "Score": 5, "TP": 108000, "SL": 105000},
+        {"Symbol": "ETH", "Strategy": "Long", "Score": 4, "TP": 2800, "SL": 2650},
+    ]
+    return pd.DataFrame(data)
+
 def is_ready_to_trade(signal, rsi, signal_score, trade_suitability):
     """
     Determines if a coin is ready to trade.
