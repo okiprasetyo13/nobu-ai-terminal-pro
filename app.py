@@ -31,7 +31,7 @@ if not signal_data.empty:
                 st.markdown(f"Strategy: `{row['Strategy']}`")
                 st.markdown(f"Advice: 📌 _{row['Advice']}_")
             with col2:
-                render_chart(row['Symbol'])
+    st.image(generate_mini_chart(row["Price History"], row["Symbol"]), caption="Mini Chart", use_column_width=True)
 else:
     st.warning("No live scalping signals available at this moment.")
 
