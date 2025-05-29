@@ -53,10 +53,9 @@ def generate_signals():
     df_result = pd.DataFrame(rows)
     return df_result.sort_values(by="Score", ascending=False).reset_index(drop=True)
 
-def simulate_price_data(symbol, price):
-    # Simulate 50 candles with small variations
-    prices = [price + random.uniform(-0.5, 0.5) for _ in range(50)]
-    df = pd.DataFrame(prices, columns=["close"])
+def load_real_price_data(symbol):
+    # Placeholder – replace with your actual loader
+    df = your_get_ohlcv_function(symbol, timeframe="1m", limit=50)
     return df
 
 def detect_signal(latest):
