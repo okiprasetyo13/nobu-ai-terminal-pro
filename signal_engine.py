@@ -3,7 +3,7 @@ import numpy as np
 from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator, MACD
 from websocket_client import get_latest_price
-from your_data_loader import your_get_ohlcv_function  # Replace this with your actual loader
+from websocket_client import get_ohlcv_data
 
 SYMBOLS = [
     "BTC-USD", "ETH-USD", "SOL-USD", "AVAX-USD", "LTC-USD",
