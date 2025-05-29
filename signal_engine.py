@@ -18,42 +18,71 @@ SYMBOLS = [
     "TON-USD", "WCFG-USD", "WLD-USD", "SUI-USD", "BONK-USD"
 ]
 
-def generate_signals():
-    rows = []
-    for symbol in SYMBOLS:
-        price = get_latest_price(symbol)
-        if price is None:
-            continue
+def generate_signals(df, symbol):
+    try:
+        # Calculate indicators
+        df['EMA9'] = EMAIndicator(close=df['close'], window=9).ema_indicator()
+        df['EMA21'] = EMAIndicator(close=df['close'], window=21).ema_indicator()
+        df['RSI'] = RSIIndicator(close=df['close'], window=14).rsi()
 
-        df = simulate_price_data(symbol, price)
-        if df is None or df.empty:
-            continue
+        # Volume-based filter
+        if 'volume' in df.columns:
+            df['volume_avg'] = df['volume'].rolling(window=10).mean()
+            if df['volume'].iloc[-1] < df['volume_avg'].iloc[-1]:
+                return None  # Skip weak volume coin
 
-        df['EMA9'] = EMAIndicator(df['close'], window=9).ema_indicator()
-        df['EMA21'] = EMAIndicator(df['close'], window=21).ema_indicator()
-        df['RSI'] = RSIIndicator(df['close'], window=14).rsi()
+        # Trend filter: skip if not in uptrend
+        if df['EMA9'].iloc[-1] < df['EMA21'].iloc[-1]:
+            return None
 
-        latest = df.iloc[-1]
-        signal = detect_signal(latest)
-        score = compute_score(latest)
-        support, resistance = get_support_resistance(df)
-        strategy, advice = determine_strategy_and_advice(latest, signal, support)
+        # Signal logic
+        latest_close = df['close'].iloc[-1]
+        ema9 = df['EMA9'].iloc[-1]
+        ema21 = df['EMA21'].iloc[-1]
+        rsi = df['RSI'].iloc[-1]
 
-        if signal != "WAIT":
-            rows.append({
-                "Symbol": symbol,
-                "Current Price": round(price, 8),
-                "RSI": round(latest['RSI'], 2),
-                "Signal": signal,
-                "Score": score,
-                "Support": support,
-                "Resistance": resistance,
-                "Buy Price": round(price, 8),
-                "Take Profit": round(price * 1.01, 8),
-                "Stop Loss": round(price * 0.99, 8),
-                "Strategy": strategy,
-                "Advice": advice
-            })
+        signal = "WAIT"
+        score = 0
+        advice = "Stay out for now"
+        trade_type = "Scalping"
+
+        if rsi < 30 and latest_close < ema9 and latest_close < ema21:
+            signal = "BUY"
+            score += 2
+            advice = "Potential bounce soon, consider watching"
+        if ema9 > ema21 and latest_close > ema9:
+            signal = "BUY"
+            score += 3
+            advice = "Strong upward momentum"
+        if rsi > 70:
+            signal = "SELL"
+            score = 1
+            advice = "Overbought zone, prepare to take profit"
+
+        # Determine trade suitability
+        if rsi < 35 and ema9 > ema21:
+            trade_type = "Scalping"
+        elif ema9 > ema21 and rsi > 50:
+            trade_type = "Long Trading"
+        elif ema9 < ema21 and rsi < 50:
+            trade_type = "Short Trading"
+
+        return {
+            'Symbol': symbol,
+            'Price': latest_close,
+            'RSI': round(rsi, 2),
+            'EMA9': round(ema9, 2),
+            'EMA21': round(ema21, 2),
+            'Signal': signal,
+            'Score': score,
+            'Advice': advice,
+            'Trade Type': trade_type,
+            'Volume': round(df['volume'].iloc[-1], 2) if 'volume' in df.columns else None,
+            'Volume Avg': round(df['volume_avg'].iloc[-1], 2) if 'volume' in df.columns else None,
+        }
+    except Exception as e:
+        print(f"[generate_signals error] {symbol}: {e}")
+        return None
 
     df_result = pd.DataFrame(rows)
     return df_result.sort_values(by="Score", ascending=False).reset_index(drop=True)
