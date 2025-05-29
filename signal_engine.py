@@ -156,6 +156,7 @@ def generate_all_signals():
         df = load_real_price_data(symbol)
         if df is not None:
             signal = generate_signals(df, symbol)
+            print(f"[DEBUG] Signal returned for {symbol}: {type(signal)}")
             if signal is not None:
                 signal_rows.append(signal)
 
