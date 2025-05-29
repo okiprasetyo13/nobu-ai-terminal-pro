@@ -159,9 +159,9 @@ def generate_all_signals():
 
     if df_result.empty:
     # After collecting signal_rows
-    if not signal_rows:
-        print("[generate_all_signals] No valid signals generated.")
-        return pd.DataFrame()
+        if not signal_rows:
+            print("[generate_all_signals] No valid signals generated.")
+            return pd.DataFrame()
 
     df_result = pd.DataFrame(signal_rows)
 
