@@ -1,63 +1,89 @@
 import pandas as pd
-from ta.momentum import RSIIndicator
+import numpy as np
 from ta.trend import EMAIndicator
-import requests
+from ta.momentum import RSIIndicator
+from plot_chart import generate_chart_base64
 
-def fetch_price_history(symbol, interval="1m", limit=100):
-    url = f"https://api.pro.coinbase.com/products/{symbol}-USDT/candles?granularity=60&limit={limit}"
-    try:
-        response = requests.get(url)
-        data = response.json()
-        prices = sorted(data, key=lambda x: x[0])  # sort by time
-        return [row[4] for row in prices]  # close prices
-    except:
-        return []
+# Simulate fetching historical price data (you should replace this with your real API/WebSocket data)
+def get_price_history(symbol, length=50):
+    np.random.seed(hash(symbol) % 10000)
+    base_price = 10000 if symbol == "BTC" else 2000
+    prices = base_price + np.cumsum(np.random.randn(length)) * 10
+    return prices.tolist()
 
-def generate_signals():
-    coins = ["BTC", "ETH", "PEPE", "AVAX", "LTC", "MATIC", "ARB", "RNDR", "OP", "ADA",
-             "INJ", "SUI", "DOGE", "XRP", "BLUR", "DYDX", "APT", "SOL", "DOT", "IMX"]
+# Determine trade suitability
+def determine_trade_type(rsi, ema9, ema21):
+    if rsi < 30 and ema9 > ema21:
+        return "Scalping"
+    elif ema9 > ema21:
+        return "Long"
+    elif ema9 < ema21:
+        return "Short"
+    else:
+        return "Neutral"
 
+# Calculate score based on signal strength
+def calculate_score(rsi, ema9, ema21):
+    score = 0
+    if 30 < rsi < 70:
+        score += 1
+    if ema9 > ema21:
+        score += 2
+    if abs(ema9 - ema21) / ema21 < 0.02:
+        score += 1
+    return min(score, 5)
+
+# Expert tip generation
+def generate_expert_tip(rsi, signal_type):
+    if signal_type == "Scalping":
+        return "Buy now, breakout expected"
+    elif signal_type == "Long":
+        return "MACD showing bullish divergence"
+    elif signal_type == "Short":
+        return "Caution: MACD weakening"
+    else:
+        return "Wait for clearer signal"
+
+# Main function
+def analyze_all_symbols():
+    symbols = ["BTC", "ETH"]  # Replace with dynamic list if needed
     rows = []
-    for coin in coins:
-        history = fetch_price_history(coin)
-        if len(history) < 20:
-            continue
 
-        prices = pd.Series(history)
-        rsi = RSIIndicator(close=prices).rsi().iloc[-1]
-        ema9 = EMAIndicator(close=prices, window=9).ema_indicator().iloc[-1]
-        ema21 = EMAIndicator(close=prices, window=21).ema_indicator().iloc[-1]
-        price_now = prices.iloc[-1]
-        support = min(prices[-10:])
-        resistance = max(prices[-10:])
-        score = 0
-        signal = "WAIT"
+    for sym in symbols:
+        price_history = get_price_history(sym)
+        close_series = pd.Series(price_history)
 
-        if price_now > ema9 > ema21 and rsi > 60:
-            signal = "STRONG BUY"
-            score = 90
-        elif price_now > ema9 and rsi > 50:
-            signal = "BUY"
-            score = 75
-        elif price_now < ema21 and rsi < 40:
-            signal = "SELL"
-            score = 30
+        rsi = RSIIndicator(close_series).rsi().iloc[-1]
+        ema9 = EMAIndicator(close_series, window=9).ema_indicator().iloc[-1]
+        ema21 = EMAIndicator(close_series, window=21).ema_indicator().iloc[-1]
 
-        row = {
-            "Symbol": coin,
-            "Price History": prices.tolist(),
+        current_price = close_series.iloc[-1]
+        support = close_series.min()
+        resistance = close_series.max()
+        entry = current_price
+        sl = support * 0.98
+        tp = resistance * 1.01
+        score = calculate_score(rsi, ema9, ema21)
+        suitability = determine_trade_type(rsi, ema9, ema21)
+        expert_tip = generate_expert_tip(rsi, suitability)
+        chart = generate_chart_base64(close_series)
+
+        rows.append({
+            "Symbol": sym,
+            "Price": round(current_price, 2),
             "RSI": round(rsi, 2),
-            "EMA9": round(ema9, 4),
-            "EMA21": round(ema21, 4),
-            "Support": round(support, 4),
-            "Resistance": round(resistance, 4),
-            "Buy Price": round(price_now, 4),
-            "SL": round(support * 0.98, 4),
-            "TP": round(resistance * 0.96, 4),
-            "Signal": signal,
-            "Score": score
-        }
-
-        rows.append(row)
+            "EMA9": round(ema9, 2),
+            "EMA21": round(ema21, 2),
+            "Support": round(support, 2),
+            "Resistance": round(resistance, 2),
+            "Entry": round(entry, 2),
+            "SL": round(sl, 2),
+            "TP": round(tp, 2),
+            "Score": score,
+            "Suitability": suitability,
+            "Expert Tip": expert_tip,
+            "Chart": chart,
+            "Price History": price_history
+        })
 
     return pd.DataFrame(rows)
