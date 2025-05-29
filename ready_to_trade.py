@@ -1,24 +1,24 @@
+def expert_trade_suggestion(price, support, resistance, signal):
+    if price is None or support is None or resistance is None:
+        return "⛔️ Insufficient data"
+    
+    try:
+        price = float(price)
+        support = float(support)
+        resistance = float(resistance)
+    except:
+        return "⚠️ Invalid values"
 
-import streamlit as st
-import requests
-import time
+    buffer = 0.002  # tolerance for buy zone
+    trade_type = ""
 
-def app():
-    st.title("🟢 Ready to Trade")
-
-    symbol = st.selectbox("Select Coin", ["BTC", "ETH"])
-    entry = st.number_input("Entry Price", min_value=0.0, format="%.2f")
-    stop_loss = st.number_input("Stop Loss", min_value=0.0, format="%.2f")
-    take_profit = st.number_input("Take Profit", min_value=0.0, format="%.2f")
-
-    if st.button("Activate Trade Monitor"):
-        if entry > 0 and stop_loss > 0 and take_profit > 0:
-            st.session_state[f"{symbol}_trade"] = {
-                'entry': entry,
-                'stop_loss': stop_loss,
-                'take_profit': take_profit,
-                'start_time': time.time()
-            }
-            st.success(f"🔔 {symbol} trade monitor activated!")
-        else:
-            st.warning("Please complete all fields.")
+    if signal == "STRONG BUY" or (price <= support * (1 + buffer)):
+        trade_type = "SCALPING BUY"
+        tp = round((price + (resistance - price) * 0.6), 4)
+        return f"💰 Buy Now\n🎯 TP: {tp}\n🛑 SL: {support * 0.98:.4f}\n🔁 Type: {trade_type}"
+    elif price >= resistance:
+        return "⚠️ Overbought - Wait"
+    elif signal == "SELL":
+        return "🔻 Consider SHORT"
+    else:
+        return "🤔 Wait for signal"
