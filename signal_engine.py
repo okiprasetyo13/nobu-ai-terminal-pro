@@ -145,37 +145,31 @@ def determine_strategy_and_advice(latest, signal, support):
     return strategy, advice
 
 def generate_all_signals():
-    rows = []
+    signal_rows = []
+
     for symbol in SYMBOLS:
-        try:
-            df = load_real_price_data(symbol)
+        df = load_real_price_data(symbol)
+        if df is not None:
             signal = generate_signals(df, symbol)
             if signal:
-                rows.append(signal)
-        except Exception as e:
-            print(f"[ERROR] {symbol}: {e}")
-            continue
+                signal_rows.append(signal)
 
-    if not rows:
-        return pd.DataFrame()  # Empty if no signals
+    # Step 5: Build initial DataFrame
+    df_result = pd.DataFrame(signal_rows)
 
-    df_result = pd.DataFrame(rows)
+    if df_result.empty:
+        return pd.DataFrame()
 
-    # Filter for strong trends and top volume coins
-    df_filtered = df_result[
-        (df_result['EMA9'] > df_result['EMA21']) & 
-        (df_result['Signal'] != 'WAIT')
-    ]
-
-    # Top 20 by volume
+    # Step 6: Filtering and Ranking
+    df_filtered = df_result[(df_result['EMA9'] > df_result['EMA21']) & (df_result['Signal'] != 'WAIT')]
     df_filtered = df_filtered.sort_values(by="Volume", ascending=False).head(20)
 
-    # Always include BTC and ETH at top
-    btc_row = df_result[df_result['Symbol'] == 'BTC-USD']
-    eth_row = df_result[df_result['Symbol'] == 'ETH-USD']
-    df_filtered = pd.concat([btc_row, eth_row, df_filtered]).drop_duplicates(subset='Symbol')
+    # Always include BTC and ETH at the top
+    btc_row = df_result[df_result['Symbol'] == 'BTC']
+    eth_row = df_result[df_result['Symbol'] == 'ETH']
+    df_combined = pd.concat([btc_row, eth_row, df_filtered]).drop_duplicates(subset='Symbol')
 
     # Final sort by Score
-    df_ranked = df_filtered.sort_values(by="Score", ascending=False).reset_index(drop=True)
+    df_ranked = df_combined.sort_values(by="Score", ascending=False).reset_index(drop=True)
 
     return df_ranked
