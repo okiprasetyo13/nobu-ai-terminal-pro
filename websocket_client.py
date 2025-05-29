@@ -96,3 +96,27 @@ def start_websocket_client():
     ws_thread = threading.Thread(target=ws.run_forever)
     ws_thread.daemon = True
     ws_thread.start()
+    
+    import pandas as pd
+    import random
+    from datetime import datetime, timedelta
+
+def get_ohlcv_data(symbol, limit=50):
+    """
+    Simulates OHLCV data using latest price + random walk. Replace this with real API for production.
+    """
+    now = datetime.utcnow()
+    price = latest_prices.get(symbol, 100.0)
+    data = []
+
+    for i in range(limit):
+        close = price + random.uniform(-1, 1)
+        high = close + random.uniform(0, 0.5)
+        low = close - random.uniform(0, 0.5)
+        volume = random.uniform(1000, 5000)
+        timestamp = now - timedelta(minutes=limit - i)
+        data.append([timestamp, close, high, low, close, volume])
+
+    df = pd.DataFrame(data, columns=["time", "open", "high", "low", "close", "volume"])
+    df.set_index("time", inplace=True)
+    return df
