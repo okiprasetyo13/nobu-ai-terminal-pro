@@ -157,9 +157,8 @@ def generate_all_signals():
         if df is not None:
             signal = generate_signals(df, symbol)
             print(f"[DEBUG] Signal returned for {symbol}: {type(signal)}")
-            if signal is not None:
-                signal_rows.append(signal)
-
+            if signal is not None and isinstance(signal, dict):
+                 signal_rows.append(signal)
     # Step 5: Build initial DataFrame
     df_result = pd.DataFrame(signal_rows)
 
