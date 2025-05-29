@@ -70,7 +70,7 @@ def analyze_symbol(symbol):
         print(f"[{symbol}] Error: {e}")
         return None
 
-def generate_signals():
+def generate_signals(df, symbol):
     rows = []
     for symbol in SYMBOLS:
         data = analyze_symbol(symbol)
