@@ -143,3 +143,39 @@ def determine_strategy_and_advice(latest, signal, support):
         advice = "No setup now. Monitor closely for breakout/retest."
         strategy = "Wait"
     return strategy, advice
+
+def generate_all_signals():
+    rows = []
+    for symbol in SYMBOLS:
+        try:
+            df = load_real_price_data(symbol)
+            signal = generate_signals(df, symbol)
+            if signal:
+                rows.append(signal)
+        except Exception as e:
+            print(f"[ERROR] {symbol}: {e}")
+            continue
+
+    if not rows:
+        return pd.DataFrame()  # Empty if no signals
+
+    df_result = pd.DataFrame(rows)
+
+    # Filter for strong trends and top volume coins
+    df_filtered = df_result[
+        (df_result['EMA9'] > df_result['EMA21']) & 
+        (df_result['Signal'] != 'WAIT')
+    ]
+
+    # Top 20 by volume
+    df_filtered = df_filtered.sort_values(by="Volume", ascending=False).head(20)
+
+    # Always include BTC and ETH at top
+    btc_row = df_result[df_result['Symbol'] == 'BTC-USD']
+    eth_row = df_result[df_result['Symbol'] == 'ETH-USD']
+    df_filtered = pd.concat([btc_row, eth_row, df_filtered]).drop_duplicates(subset='Symbol')
+
+    # Final sort by Score
+    df_ranked = df_filtered.sort_values(by="Score", ascending=False).reset_index(drop=True)
+
+    return df_ranked
