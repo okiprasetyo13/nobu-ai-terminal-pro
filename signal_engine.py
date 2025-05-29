@@ -99,7 +99,8 @@ def generate_signals():
 
 # Helper functions
 def load_real_price_data(symbol):
-    return your_get_ohlcv_function(symbol, timeframe="1m", limit=50)
+    from websocket_client import get_ohlcv_data
+    return get_ohlcv_data(symbol)
 
 def detect_signal(latest):
     if latest['RSI'] < 30 and latest['EMA9'] > latest['EMA21']:
