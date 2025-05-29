@@ -159,23 +159,21 @@ def generate_all_signals():
 
     if df_result.empty:
     # After collecting signal_rows
-if not signal_rows:
-    print("[generate_all_signals] No valid signals generated.")
-    return pd.DataFrame()
+    if not signal_rows:
+        print("[generate_all_signals] No valid signals generated.")
+        return pd.DataFrame()
 
-# Then continue building df_result
-df_result = pd.DataFrame(signal_rows)
-    
-    # Step 6: Filtering and Ranking
+    df_result = pd.DataFrame(signal_rows)
+
+    # === Dynamic Filtering and Ranking Logic ===
     df_filtered = df_result[(df_result['EMA9'] > df_result['EMA21']) & (df_result['Signal'] != 'WAIT')]
     df_filtered = df_filtered.sort_values(by="Volume", ascending=False).head(20)
 
-    # Always include BTC and ETH at the top
-    btc_row = df_result[df_result['Symbol'] == 'BTC']
-    eth_row = df_result[df_result['Symbol'] == 'ETH']
-    df_combined = pd.concat([btc_row, eth_row, df_filtered]).drop_duplicates(subset='Symbol')
+    # Always include BTC and ETH
+    btc_row = df_result[df_result['Symbol'] == 'BTC-USD']
+    eth_row = df_result[df_result['Symbol'] == 'ETH-USD']
+    df_filtered = pd.concat([btc_row, eth_row, df_filtered]).drop_duplicates(subset='Symbol')
 
-    # Final sort by Score
-    df_ranked = df_combined.sort_values(by="Score", ascending=False).reset_index(drop=True)
-
+    # Final sorting by Score
+    df_ranked = df_filtered.sort_values(by="Score", ascending=False).reset_index(drop=True)
     return df_ranked
