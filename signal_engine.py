@@ -151,7 +151,7 @@ def generate_all_signals():
         df = load_real_price_data(symbol)
         if df is not None:
             signal = generate_signals(df, symbol)
-            if signal:
+            if signal is not None:
                 signal_rows.append(signal)
 
     # Step 5: Build initial DataFrame
