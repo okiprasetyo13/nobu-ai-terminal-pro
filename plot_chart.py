@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
 
-def plot_mini_chart(prices, support=None, resistance=None):
+def generate_mini_chart(prices, support=None, resistance=None):
     """
     Generates a mini inline chart for display in the Signal Table.
 
