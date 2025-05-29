@@ -23,10 +23,13 @@ else:
     df_signals["Live Price"] = df_signals["Symbol"].apply(lambda sym: latest_prices.get(sym, None))
 
     # Add mini chart column
-    df_signals["Chart"] = df_signals["Symbol"].apply(
-        lambda sym: generate_chart_base64(df_signals[df_signals["Symbol"] == sym]["Price History"].values[0], sym)
-        if "Price History" in df_signals.columns else "--"
-    )
+    def safe_chart(row):
+    price_history = row.get("Price History", [])
+    if isinstance(price_history, list) and len(price_history) > 0:
+        return generate_mini_chart(price_history, row["Symbol"])
+    return "--"
+
+df_signals["Chart"] = df_signals.apply(safe_chart, axis=1)
 
     # Add expert advice
     df_signals["Expert Advice"] = df_signals.apply(
