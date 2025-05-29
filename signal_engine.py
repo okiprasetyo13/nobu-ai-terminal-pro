@@ -158,10 +158,11 @@ def generate_all_signals():
     df_result = pd.DataFrame(signal_rows)
 
     if df_result.empty:
+    
     if not signal_rows:
         print("[generate_all_signals] No valid signals generated.")
         return pd.DataFrame()
-
+    
     # Step 6: Filtering and Ranking
     df_filtered = df_result[(df_result['EMA9'] > df_result['EMA21']) & (df_result['Signal'] != 'WAIT')]
     df_filtered = df_filtered.sort_values(by="Volume", ascending=False).head(20)
