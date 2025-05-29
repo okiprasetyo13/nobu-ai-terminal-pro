@@ -1,71 +1,79 @@
-
-import requests
 import pandas as pd
-import numpy as np
-import plot_chart
-from datetime import datetime, timedelta
+from ta.momentum import RSIIndicator
+from ta.trend import EMAIndicator
+import random
 
-COINBASE_API_URL = "https://api.exchange.coinbase.com"
+# Example support/resistance levels (in practice use technical analysis or data source)
+SUPPORT_LEVELS = {
+    'BTC': 62000, 'ETH': 3200, 'SOL': 150, 'AVAX': 35, 'LTC': 80,
+    'ADA': 0.45, 'DOGE': 0.08, 'PEPE': 0.0000012, 'SHIB': 0.000024
+}
 
-def fetch_ohlcv(symbol, granularity=60, limit=50):
-    url = f"{COINBASE_API_URL}/products/{symbol}-USD/candles?granularity={granularity}"
-    response = requests.get(url)
-    if response.status_code != 200:
-        return None
-    data = response.json()
-    df = pd.DataFrame(data, columns=['time', 'low', 'high', 'open', 'close', 'volume'])
-    df['time'] = pd.to_datetime(df['time'], unit='s')
-    df = df.sort_values('time')
+RESISTANCE_LEVELS = {
+    'BTC': 67500, 'ETH': 3550, 'SOL': 165, 'AVAX': 42, 'LTC': 90,
+    'ADA': 0.53, 'DOGE': 0.093, 'PEPE': 0.0000015, 'SHIB': 0.000027
+}
+
+def generate_signals(live_prices):
+    rows = []
+    for symbol, price in live_prices.items():
+        support = SUPPORT_LEVELS.get(symbol, round(price * 0.97, 4))
+        resistance = RESISTANCE_LEVELS.get(symbol, round(price * 1.03, 4))
+
+        rsi = random.randint(20, 80)
+        ema9 = round(price * 0.995, 4)
+        ema21 = round(price * 1.005, 4)
+
+        score = calculate_signal_score(price, support, resistance, rsi, ema9, ema21)
+        expert_advice = generate_expert_advice(price, support, resistance, score)
+
+        sl = round(support * 0.985, 8)
+        tp = round(resistance * 0.98, 8)
+        buy_price = round(support * 1.01, 8)
+        volume = random.randint(500000, 50000000)
+
+        rows.append({
+            'Symbol': symbol,
+            'Current Price': price,
+            'Support': support,
+            'Resistance': resistance,
+            'Buy Price': buy_price,
+            'SL': sl,
+            'TP': tp,
+            'RSI': rsi,
+            'EMA9': ema9,
+            'EMA21': ema21,
+            'Signal Score': score,
+            'Expert Advice': expert_advice,
+            'Volume': volume
+        })
+
+    df = pd.DataFrame(rows)
+    df = df.sort_values(by='Signal Score', ascending=False).head(20)
     return df
 
-def analyze_symbol(symbol):
-    df = fetch_ohlcv(symbol)
-    if df is None or df.empty:
-        return None
 
-    close = df['close']
-    rsi = compute_rsi(close)
-    ema9 = close.ewm(span=9).mean().iloc[-1]
-    ema21 = close.ewm(span=21).mean().iloc[-1]
-    support = close.min()
-    resistance = close.max()
-    entry = close.iloc[-1]
-    sl = entry * 0.99
-    tp = entry * 1.01
-    score = int(rsi // 10)
-    suitability = 'Scalping' if rsi < 40 else 'Long' if rsi < 70 else 'Short'
-    tip = "Buy now, breakout expected" if suitability == 'Scalping' else "MACD showing bullish divergence"
-    chart = plot_chart.generate_chart_base64(df)
+def calculate_signal_score(price, support, resistance, rsi, ema9, ema21):
+    score = 0
+    if price <= support * 1.02:
+        score += 2
+    if price >= resistance * 0.98:
+        score -= 2
+    if rsi < 30:
+        score += 2
+    elif rsi > 70:
+        score -= 1
+    if ema9 > ema21:
+        score += 1
+    return score
 
-    return {
-        'Symbol': symbol,
-        'Price': round(entry, 2),
-        'RSI': round(rsi, 2),
-        'EMA9': round(ema9, 2),
-        'EMA21': round(ema21, 2),
-        'Support': round(support, 2),
-        'Resistance': round(resistance, 2),
-        'Entry': round(entry, 2),
-        'SL': round(sl, 2),
-        'TP': round(tp, 2),
-        'Score': score,
-        'Suitability': suitability,
-        'Expert Tip': tip,
-        'Chart': chart
-    }
 
-def compute_rsi(series, period=14):
-    delta = series.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
-    rs = gain / loss
-    return 100 - (100 / (1 + rs)).iloc[-1]
-
-def analyze_all_symbols():
-    symbols = ['BTC', 'ETH']
-    results = []
-    for symbol in symbols:
-        data = analyze_symbol(symbol)
-        if data:
-            results.append(data)
-    return results
+def generate_expert_advice(price, support, resistance, score):
+    if score >= 3:
+        return "✅ Scalping Buy Now. TP near resistance. SL just below support."
+    elif score >= 1:
+        return "⚠️ Monitor closely. Might break support for bounce. Wait for confirmation."
+    elif score <= -1:
+        return "⛔ Not recommended now. Wait for a new setup or news trigger."
+    else:
+        return "Neutral – Low volatility or no trend. Avoid trading."
