@@ -20,6 +20,8 @@ with st.spinner("Generating expert scalping signals..."):
 # DEBUG: Show current columns and preview of df_signals
 st.write("📋 df_signals Columns:", df_signals.columns.tolist())
 st.dataframe(df_signals.head())
+st.write("🧪 DEBUG: df_signals columns before adding Live Price:", df_signals.columns.tolist())
+st.write("🧪 DEBUG: df_signals head:", df_signals.head())
 df_signals["Live Price"] = df_signals["Symbol"].apply(lambda sym: latest_prices.get(sym, None))
 
 # Add inline chart
