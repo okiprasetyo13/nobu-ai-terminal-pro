@@ -1,36 +1,46 @@
 import streamlit as st
 import pandas as pd
-from signal_engine import analyze_all_symbols
-import ready_to_trade
-import time
+from signal_engine import generate_signals
+from websocket_client import get_latest_prices
+from ready_to_trade import evaluate_trade_opportunities
+from plot_chart import generate_chart_image
+from telegram_alerts import send_telegram_alert
 
+# --- Streamlit Setup ---
 st.set_page_config(page_title="Nobu AI Terminal Pro", layout="wide")
-st.title("📡 Nobu AI Terminal Pro – Expert Scalping Terminal")
+st.title("📡 Nobu AI Terminal Pro – Live Expert Scalping Signal")
 
-tabs = st.tabs(["Live Signal Scanner", "Ready to Trade", "Market Overview"])
+# --- Load Signals and Data ---
+with st.spinner("Loading market data and signals..."):
+    live_prices = get_latest_prices()
+    signal_data = generate_signals(live_prices)
+    trade_advice = evaluate_trade_opportunities(signal_data)
 
-# Run Signal Engine
-with st.spinner("🔄 Loading live scalping signals..."):
-    results = analyze_all_symbols()
-    df = pd.DataFrame(results)
+# --- Display Table ---
+st.subheader("💹 Live Scalping Signals – Updated in Real Time")
 
-with tabs[0]:
-    st.subheader("📊 Live Scalping Signal Table")
-    st.markdown("✅ Coinbase WebSocket live price feed connected")
-    st.markdown("✅ RSI, EMA9/21, MACD, Volume Spike signals active")
-    st.markdown("✅ Signal Table: Support, Resistance, Entry, TP, SL, Score")
-    st.markdown("✅ Inline Chart (with MACD, S/R, TP)")
-    st.markdown("🟢 Trade Suitability: Long, Short, Scalping")
-    st.markdown(df.to_html(escape=False), unsafe_allow_html=True)
-    st.success("✅ Full table rendered with live data and charts.")
+if signal_data.empty:
+    st.warning("No signal data available. Please wait for updates.")
+else:
+    for i, row in signal_data.iterrows():
+        col1, col2 = st.columns([3, 2])
+        with col1:
+            st.markdown(f"### {row['Symbol']} - ${row['Current Price']}")
+            st.metric("Score", row['Signal Score'], delta=None)
+            st.write(f"**Buy Price:** {row['Buy Price']}")
+            st.write(f"**Support:** {row['Support']} | **Resistance:** {row['Resistance']}")
+            st.write(f"**SL:** {row['SL']} | **TP:** {row['TP']}")
+            st.write(f"**RSI:** {row['RSI']} | **EMA(9):** {row['EMA9']} | **EMA(21):** {row['EMA21']}")
+            st.write(f"**Volume:** {row['Volume']}")
 
-with tabs[1]:
-    st.subheader("🛠 Ready to Trade")
-    ready_to_trade.app()
+        with col2:
+            st.image(generate_chart_image(row['Symbol']), caption="Live Chart", use_column_width=True)
 
-with tabs[2]:
-    st.subheader("📈 Market Overview (to be implemented)")
-    st.markdown("✅ Overview of top ranked scalping coins")
-    st.markdown("✅ Real-time signal feed")
+        st.success(f"**Expert Advice:** {row['Expert Advice']}")
 
-st.markdown("✅ Nobu AI Terminal v0.1 Pro loaded. Live signal engine and charts are integrated.")
+# --- Alert Section ---
+st.markdown("---")
+st.subheader("📬 SL/TP Alert Test (Manual Trigger)")
+if st.button("Test Telegram Alert"):
+    send_telegram_alert("Test alert from Nobu AI Terminal 🚀")
+    st.success("Test alert sent.")
