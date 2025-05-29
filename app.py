@@ -14,7 +14,7 @@ st.title("📡 Nobu AI Terminal Pro – Expert Scalping Terminal v0.2")
 
 # Live Scalping Signal Table
 st.subheader("📈 Live Scalping Signal Table (Real-Time)")
-signal_data = generate_signals()
+signal_data = generate_all_signals()
 if not signal_data.empty:
     for idx, row in signal_data.iterrows():
         with st.container():
