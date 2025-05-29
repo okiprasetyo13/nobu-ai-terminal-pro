@@ -146,6 +146,11 @@ def determine_strategy_and_advice(latest, signal, support):
 
 def generate_all_signals():
     signal_rows = []
+    for symbol in SYMBOLS:
+        df = load_real_price_data(symbol)
+        signal = generate_signals(df, symbol)
+        if signal:
+            signal_rows.append(signal)
 
     for symbol in SYMBOLS:
         df = load_real_price_data(symbol)
