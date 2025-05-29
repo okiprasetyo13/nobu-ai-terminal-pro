@@ -64,3 +64,35 @@ def launch_websocket_thread():
     thread = threading.Thread(target=start_websocket)
     thread.daemon = True
     thread.start()
+
+import threading
+from websocket import WebSocketApp
+
+def start_websocket_client():
+    """
+    Starts the WebSocket client in a separate thread for real-time price updates.
+    """
+    def on_message(ws, message):
+        # Process incoming messages here if needed
+        print(f"WebSocket Message: {message}")
+
+    def on_error(ws, error):
+        print(f"WebSocket Error: {error}")
+
+    def on_close(ws, close_status_code, close_msg):
+        print("WebSocket Closed")
+
+    def on_open(ws):
+        print("WebSocket Connection Opened")
+
+    ws = WebSocketApp(
+        "wss://ws-feed.exchange.coinbase.com",
+        on_message=on_message,
+        on_error=on_error,
+        on_close=on_close,
+        on_open=on_open,
+    )
+
+    ws_thread = threading.Thread(target=ws.run_forever)
+    ws_thread.daemon = True
+    ws_thread.start()
