@@ -85,7 +85,23 @@ def generate_signals(df, symbol):
         return None
 
     df_result = pd.DataFrame(rows)
-    return df_result.sort_values(by="Score", ascending=False).reset_index(drop=True)
+
+# === Dynamic Filtering and Ranking Logic ===
+# 1. Filter coins in UP trend
+df_filtered = df_result[(df_result['EMA9'] > df_result['EMA21']) & (df_result['Signal'] != 'WAIT')]
+
+# 2. Filter top 20 by volume
+df_filtered = df_filtered.sort_values(by="Volume", ascending=False).head(20)
+
+# 3. Always include BTC and ETH at top
+btc_row = df_result[df_result['Symbol'] == 'BTC']
+eth_row = df_result[df_result['Symbol'] == 'ETH']
+df_filtered = pd.concat([btc_row, eth_row, df_filtered]).drop_duplicates(subset='Symbol')
+
+# 4. Final sorting by Score
+df_ranked = df_filtered.sort_values(by="Score", ascending=False).reset_index(drop=True)
+
+return df_ranked
 
 def load_real_price_data(symbol):
     # Placeholder – replace with your actual loader
