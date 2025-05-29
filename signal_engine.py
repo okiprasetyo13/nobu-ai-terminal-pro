@@ -4,6 +4,11 @@ from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator
 import random
 from websocket_client import get_latest_price
+from ta.trend import MACD
+
+# Inside generate_signals():
+df['MACD'] = MACD(df['close']).macd()
+df['MACD_SIGNAL'] = MACD(df['close']).macd_signal()
 
 # List of tracked symbols (can be updated dynamically)
 SYMBOLS = [
@@ -73,6 +78,10 @@ def compute_score(latest):
     if latest['RSI'] < 30:
         score += 1
     elif latest['RSI'] > 70:
+        score -= 1
+    if latest['MACD'] > latest['MACD_SIGNAL']:
+        score += 1
+    else:
         score -= 1
     return score
 
