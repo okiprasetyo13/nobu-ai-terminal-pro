@@ -1,66 +1,62 @@
 import streamlit as st
 import pandas as pd
-from websocket_client import start_price_feed, latest_prices
-from signal_engine import generate_signals
-from plot_chart import generate_mini_chart
-from ready_to_trade import expert_trade_suggestion
+from signal_engine import analyze_all_symbols
+from plot_chart import generate_chart_base64
+from telegram_alerts import expert_trade_suggestion
+from websocket_client import latest_prices
 
-# Streamlit page setup
 st.set_page_config(page_title="Nobu AI Terminal Pro", layout="wide")
 st.title("📡 Nobu AI Terminal Pro – Expert Scalping Signals")
 
-# Initialize WebSocket feed (runs in thread)
-start_price_feed()
+# Analyze signals
+df_signals = analyze_all_symbols()
 
-# Load signal table
-with st.spinner("Generating expert scalping signals..."):
-    df_signals = generate_signals()
+# Check and display available columns (for debug)
+st.checkbox("🔍 df_signals Columns:", value=True)
+st.write(df_signals.columns.tolist())
 
-# Append real-time price
-# DEBUG: Show current columns and preview of df_signals
-st.write("🧪 DEBUG: df_signals columns before adding Live Price:", df_signals.columns.tolist())
-st.write("🧪 DEBUG: df_signals head:", df_signals.head())
-if "Symbol" in df_signals.columns:
-    df_signals["Live Price"] = df_signals["Symbol"].apply(lambda sym: latest_prices.get(sym, None))
+# Prevent crash if 'Symbol' is missing
+if "Symbol" not in df_signals.columns or df_signals.empty:
+    st.error("⚠️ No valid signal data returned. Please check your filters or try again later.")
 else:
-    st.warning("⚠️ Column 'Symbol' not found in df_signals. Skipping live price mapping.")
+    # Add Live Price column
+    df_signals["Live Price"] = df_signals["Symbol"].apply(lambda sym: latest_prices.get(sym, None))
 
-# Add inline chart
-df_signals["Chart"] = df_signals["Symbol"].apply(
-    lambda sym: generate_mini_chart(df_signals[df_signals["Symbol"] == sym]["Price History"].values[0], sym)
-    if "Price History" in df_signals.columns else ""
-)
+    # Add mini chart column
+    df_signals["Chart"] = df_signals["Symbol"].apply(
+        lambda sym: generate_chart_base64(df_signals[df_signals["Symbol"] == sym]["Price History"].values[0], sym)
+        if "Price History" in df_signals.columns else "--"
+    )
 
-# Add expert advice
-df_signals["Expert Advice"] = df_signals.apply(
-    lambda row: expert_trade_suggestion(
-        price=row["Live Price"],
-        support=row["Support"],
-        resistance=row["Resistance"],
-        signal=row["Signal"]
-    ),
-    axis=1
-)
+    # Add expert advice
+    df_signals["Expert Advice"] = df_signals.apply(
+        lambda row: expert_trade_suggestion(
+            price=row["Live Price"],
+            support=row["Support"],
+            resistance=row["Resistance"],
+            signal=row["Signal"]
+        ),
+        axis=1
+    )
 
-# Clean up and reorder columns
-columns_order = [
-    "Symbol", "Live Price", "Signal", "Score", "RSI", "EMA9", "EMA21",
-    "Support", "Resistance", "Buy Price", "SL", "TP", "Expert Advice", "Chart"
-]
-df_display = df_signals[columns_order].copy()
+    # Clean column order
+    columns_order = [
+        "Symbol", "Price", "RSI", "EMA9", "EMA21",
+        "Support", "Resistance", "Entry", "SL", "TP",
+        "Score", "Suitability", "Expert Advice", "Chart"
+    ]
+    df_display = df_signals[columns_order].copy()
 
-# Format floats for display
-def fmt(val):
-    return f"{val:.8f}" if isinstance(val, float) and val < 1 else f"{val:.4f}" if isinstance(val, float) else val
+    # Format floats
+    def fmt(val):
+        return f"{val:.8f}" if isinstance(val, float) and val < 1 else f"{val:,.2f}" if isinstance(val, float) else val
+    df_display = df_display.applymap(fmt)
 
-df_display = df_display.applymap(fmt)
+    # Display table
+    st.subheader("📊 Live Scalping Signal Table")
+    st.dataframe(df_display, use_container_width=True, hide_index=True)
 
-# Display the table
-st.markdown("### 📈 Live Expert Scalping Signals")
-st.write(
-    df_display.to_html(escape=False, index=False), unsafe_allow_html=True
-)
+    st.success("✅ Full table rendered with live data and charts.")
 
 # Footer
-st.markdown("---")
-st.caption("Built with ❤️ by Nobu AI | v0.2 – Real-time crypto scalping intelligence.")
+st.markdown("✅ Nobu AI Terminal v0.2 Pro loaded. Live signal engine and charts are integrated.")
