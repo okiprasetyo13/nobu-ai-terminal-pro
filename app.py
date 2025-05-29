@@ -1,46 +1,60 @@
 import streamlit as st
 import pandas as pd
+from websocket_client import start_price_feed, latest_prices
 from signal_engine import generate_signals
-from websocket_client import get_latest_prices
-from ready_to_trade import evaluate_trade_opportunities
-from plot_chart import generate_chart_image
-from telegram_alerts import send_telegram_alert
+from plot_chart import generate_mini_chart
+from ready_to_trade import expert_trade_suggestion
 
-# --- Streamlit Setup ---
+# Streamlit page setup
 st.set_page_config(page_title="Nobu AI Terminal Pro", layout="wide")
-st.title("📡 Nobu AI Terminal Pro – Live Expert Scalping Signal")
+st.title("📡 Nobu AI Terminal Pro – Expert Scalping Signals")
 
-# --- Load Signals and Data ---
-with st.spinner("Loading market data and signals..."):
-    live_prices = get_latest_prices()
-    signal_data = generate_signals(live_prices)
-    trade_advice = evaluate_trade_opportunities(signal_data)
+# Initialize WebSocket feed (runs in thread)
+start_price_feed()
 
-# --- Display Table ---
-st.subheader("💹 Live Scalping Signals – Updated in Real Time")
+# Load signal table
+with st.spinner("Generating expert scalping signals..."):
+    df_signals = generate_signals()
 
-if signal_data.empty:
-    st.warning("No signal data available. Please wait for updates.")
-else:
-    for i, row in signal_data.iterrows():
-        col1, col2 = st.columns([3, 2])
-        with col1:
-            st.markdown(f"### {row['Symbol']} - ${row['Current Price']}")
-            st.metric("Score", row['Signal Score'], delta=None)
-            st.write(f"**Buy Price:** {row['Buy Price']}")
-            st.write(f"**Support:** {row['Support']} | **Resistance:** {row['Resistance']}")
-            st.write(f"**SL:** {row['SL']} | **TP:** {row['TP']}")
-            st.write(f"**RSI:** {row['RSI']} | **EMA(9):** {row['EMA9']} | **EMA(21):** {row['EMA21']}")
-            st.write(f"**Volume:** {row['Volume']}")
+# Append real-time price
+df_signals["Live Price"] = df_signals["Symbol"].apply(lambda sym: latest_prices.get(sym, None))
 
-        with col2:
-            st.image(generate_chart_image(row['Symbol']), caption="Live Chart", use_column_width=True)
+# Add inline chart
+df_signals["Chart"] = df_signals["Symbol"].apply(
+    lambda sym: generate_mini_chart(df_signals[df_signals["Symbol"] == sym]["Price History"].values[0], sym)
+    if "Price History" in df_signals.columns else ""
+)
 
-        st.success(f"**Expert Advice:** {row['Expert Advice']}")
+# Add expert advice
+df_signals["Expert Advice"] = df_signals.apply(
+    lambda row: expert_trade_suggestion(
+        price=row["Live Price"],
+        support=row["Support"],
+        resistance=row["Resistance"],
+        signal=row["Signal"]
+    ),
+    axis=1
+)
 
-# --- Alert Section ---
+# Clean up and reorder columns
+columns_order = [
+    "Symbol", "Live Price", "Signal", "Score", "RSI", "EMA9", "EMA21",
+    "Support", "Resistance", "Buy Price", "SL", "TP", "Expert Advice", "Chart"
+]
+df_display = df_signals[columns_order].copy()
+
+# Format floats for display
+def fmt(val):
+    return f"{val:.8f}" if isinstance(val, float) and val < 1 else f"{val:.4f}" if isinstance(val, float) else val
+
+df_display = df_display.applymap(fmt)
+
+# Display the table
+st.markdown("### 📈 Live Expert Scalping Signals")
+st.write(
+    df_display.to_html(escape=False, index=False), unsafe_allow_html=True
+)
+
+# Footer
 st.markdown("---")
-st.subheader("📬 SL/TP Alert Test (Manual Trigger)")
-if st.button("Test Telegram Alert"):
-    send_telegram_alert("Test alert from Nobu AI Terminal 🚀")
-    st.success("Test alert sent.")
+st.caption("Built with ❤️ by Nobu AI | v0.2 – Real-time crypto scalping intelligence.")
