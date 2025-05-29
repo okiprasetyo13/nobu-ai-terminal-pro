@@ -1,29 +1,28 @@
 import matplotlib.pyplot as plt
-import base64
 from io import BytesIO
+import base64
 
-def generate_mini_chart(prices: list, symbol: str = "") -> str:
+def generate_chart_base64(df, symbol=""):
     """
-    Generates a small price trend chart as base64-encoded image.
-    Returns a string that can be embedded in Streamlit.
+    Generate a mini inline chart and return it as a base64-encoded image for embedding in Streamlit table.
     """
-    if not prices or len(prices) < 2:
+    if df is None or df.empty:
         return ""
 
-    fig, ax = plt.subplots(figsize=(2.5, 0.75))
-    ax.plot(prices, linewidth=1.2)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_title(symbol, fontsize=6)
-    ax.set_facecolor("white")
-    fig.patch.set_facecolor("white")
+    try:
+        fig, ax = plt.subplots(figsize=(2, 1))
+        ax.plot(df["close"].values[-30:], linewidth=1.5, color='blue')
+        ax.set_title(symbol, fontsize=6)
+        ax.axis('off')
+        plt.tight_layout()
 
-    # Save image to buffer
-    buf = BytesIO()
-    plt.savefig(buf, format="png", bbox_inches='tight', pad_inches=0.05)
-    plt.close(fig)
-    buf.seek(0)
+        buf = BytesIO()
+        plt.savefig(buf, format="png")
+        plt.close(fig)
+        buf.seek(0)
 
-    # Encode image to base64
-    image_base64 = base64.b64encode(buf.read()).decode("utf-8")
-    return f"<img src='data:image/png;base64,{image_base64}' width='100'/>"
+        image_base64 = base64.b64encode(buf.read()).decode()
+        return f'<img src="data:image/png;base64,{image_base64}" width="80" height="30" />'
+    except Exception as e:
+        print(f"[Chart error] {e}")
+        return ""
