@@ -36,8 +36,6 @@ if not signal_data.empty:
                 caption="Mini Chart",
                 use_column_width=True
                 )
-            else:
-                st.warning("No live scalping signals available at this moment.")
 
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
