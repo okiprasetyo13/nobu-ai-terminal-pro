@@ -46,11 +46,10 @@ for col, header in zip(cols, headers):
 # Rows
 for _, row in signal_data.iterrows():
     cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
-
     live_price = get_live_price(row["Symbol"])
-    price_display = f"${live_price:,.2f}" if live_price else f"${row['Current Price']:.2f}"
+    price_display = f"${live_price:.2f}" if live_price else f"${row['Current Price']:.2f}"
 
-    cols[0].markdown(f"🪙 {row['Symbol']}")
+    cols[0].markdown(f"🌕 {row['Symbol']}")
     cols[1].markdown(f"`{row['Strategy']}`")
     cols[2].markdown(f"{row['RSI']:.2f}")
     cols[3].markdown(f"🧠 {row['Score']}")
@@ -60,7 +59,19 @@ for _, row in signal_data.iterrows():
     cols[7].markdown(row["Stop Loss"])
     cols[8].markdown(f"🧱 {row['Resistance']}")
     cols[9].markdown(f"📌 *{row['Advice']}*")
-    #Generate Chart
+
+    # ✅ Expert Chart Preparation
+    df_history = pd.DataFrame(row["Price History"], columns=["close"])
+    df_history["open"] = df_history["close"].shift(1).fillna(method="bfill")
+    df_history["high"] = df_history["close"] + 5
+    df_history["low"] = df_history["close"] - 5
+    df_history["volume"] = 10000
+    df_history["EMA9"] = df_history["close"].ewm(span=9).mean()
+    df_history["EMA21"] = df_history["close"].ewm(span=21).mean()
+    df_history["RSI"] = RSIIndicator(df_history["close"], window=14).rsi()
+    df_history.index = pd.date_range(end=pd.Timestamp.now(), periods=len(df_history), freq="1min")
+
+    # ✅ Generate Chart
     chart = generate_expert_chart(df_history, row["Symbol"])
     cols[10].image("data:image/png;base64," + chart, use_column_width=True)
 
