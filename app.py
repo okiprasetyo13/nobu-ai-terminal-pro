@@ -1,10 +1,12 @@
 import streamlit as st
 import pandas as pd
+import requests
 from signal_engine import generate_all_signals
 from plot_chart import generate_mini_chart
 from websocket_client import start_websocket_client
 from ready_to_trade import get_ready_to_trade_data
 from websocket_client import launch_websocket_thread
+
 launch_websocket_thread()
 print("[⚡] WebSocket thread launched")
 
@@ -15,9 +17,20 @@ start_websocket_client()
 
 st.title("📡 Nobu AI Terminal Pro – Expert Scalping Terminal v0.2")
 
+# === Live FastAPI Price Fetcher ===
+@st.cache_data(ttl=5)
+def get_live_price(symbol):
+    try:
+        url = f"https://nobu-fastapi-price.onrender.com/price/{symbol}"
+        res = requests.get(url).json()
+        return float(res["price"])
+    except:
+        return None
+
 # Live Scalping Signal Table
 st.subheader("📈 Live Scalping Signal Table (Real-Time)")
 signal_data = generate_all_signals()
+
 # 🧠 Expert One-Glance Signal Table
 st.subheader("📊 Expert Signal Table (One-Glance View)")
 
@@ -35,18 +48,21 @@ for _, row in signal_data.iterrows():
     chart = generate_mini_chart(row["Price History"])
     cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
 
+    live_price = get_live_price(row["Symbol"])
+    price_display = f"${live_price:,.2f}" if live_price else f"${row['Current Price']:.2f}"
+
     cols[0].markdown(f"🪙 {row['Symbol']}")
     cols[1].markdown(f"`{row['Strategy']}`")
     cols[2].markdown(f"{row['RSI']:.2f}")
     cols[3].markdown(f"🧠 {row['Score']}")
     cols[4].markdown(f"`{row['Signal']}`")
-    cols[5].markdown(f"${row['Current Price']:.2f}")
+    cols[5].markdown(price_display)
     cols[6].markdown(row["Take Profit"])
     cols[7].markdown(row["Stop Loss"])
-    cols[8].markdown(f"🧱 {row['Resistance']}")   # ✅ ADDED Resistance
+    cols[8].markdown(f"🧱 {row['Resistance']}")
     cols[9].markdown(f"📌 *{row['Advice']}*")
     cols[10].image(chart, use_column_width=True)
-            
+
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
 ready_data = get_ready_to_trade_data()
