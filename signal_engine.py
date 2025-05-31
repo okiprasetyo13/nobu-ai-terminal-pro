@@ -171,14 +171,22 @@ def generate_all_signals():
         'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
     ]
 
-    for symbol in symbol_list:
+        for symbol in symbol_list:
         try:
             # Generate a base price per symbol
             coinbase_symbol = f"{symbol}-USD"
 
-        base_price = get_live_price(symbol)
-        print(f"[🔄] {symbol} live price = {base_price}")
-        price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
+            def get_live_price(symbol):
+                url = f"https://nobu-fastapi-price.onrender.com/price/{symbol}"
+                try:
+                    res = requests.get(url).json()
+                    return float(res["price"])
+                except:
+                    return random.randint(10000, 60000)
+
+            base_price = get_live_price(symbol)
+            print(f"[🔄] {symbol} live price = {base_price}")
+            price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
 
             row = {
                 'Symbol': symbol,
