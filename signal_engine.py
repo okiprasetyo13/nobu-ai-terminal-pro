@@ -121,8 +121,10 @@ def get_live_price(symbol):
 
 def generate_all_signals():
     signal_rows = []
-    symbol_list = [
-        'BTC', 'ETH', 'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
+    # ✅ Always prioritize BTC and ETH first
+    priority_symbols = ['BTC', 'ETH']
+    other_symbols = [
+    	'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
         'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
     ]
 
