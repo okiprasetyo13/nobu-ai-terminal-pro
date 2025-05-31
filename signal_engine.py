@@ -150,44 +150,75 @@ symbol_list = [
 ]
 
 def generate_all_signals():
+    import pandas as pd
+
     signal_rows = []
-    for symbol in SYMBOLS:
-        df = load_real_price_data(symbol)
-        signal = generate_signals(df, symbol)
-        print(f"[DEBUG] Checking {symbol}")
-        if signal is not None and not signal.empty:
-            signal_rows.append(signal)
 
-    # Step 5: Build initial DataFrame
-    df_result = pd.DataFrame(signal_rows)
+    # TEMP: Manually use 20 scalping coins
+    symbol_list = [
+        'BTC', 'ETH', 'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
+        'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
+    ]
 
-    if df_result.empty:
-    # After collecting signal_rows
-        if not signal_rows:
-            print("[generate_all_signals] No valid signals generated.")
-            return pd.DataFrame()
+    for symbol in symbol_list:
+        print(f"[CHECKING] {symbol} - Generating signal...")
 
-			print(f"[SUMMARY] Generated {len(signal_rows)} signals.")
+        try:
+            # TODO: Replace this with real signal logic
+            # Dummy signal logic for now
+            score = 4
+            strategy = "Scalping"
+
+            if score >= 4:
+                row = {
+                    'Symbol': symbol,
+                    'Strategy': strategy,
+                    'Score': score,
+                    'TP': 108000,
+                    'SL': 105000,
+                    'Buy Price': 106500,
+                    'Support': 105000,
+                    'Resistance': 108500,
+                    'Signal': 'Buy',
+                    'RSI': 35,
+                    'EMA9': 106400,
+                    'EMA21': 106200,
+                    'Volume': 50000000,
+                    'Expert Advice': 'Buy on support',
+                    'Trade Type': 'Scalping',
+                }
+                signal_rows.append(row)
+                print(f"[RESULT] {symbol} ✅ Added to signals")
+            else:
+                print(f"[SKIPPED] {symbol} ❌ Score too low")
+
+        except Exception as e:
+            print(f"[ERROR] {symbol} crashed: {e}")
+
+    # Final log
+    print(f"[SUMMARY] Total signals generated: {len(signal_rows)}")
+
     if not signal_rows:
-			print("[WARNING] No signals generated. Adding dummy BTC row.")
-    signal_rows.append({
-        'Symbol': 'BTC',
-        'Strategy': 'Scalping',
-        'Score': 5,
-        'SL': 105000,
-        'TP': 108000,
-        'Buy Price': 106500,
-        'Support': 105000,
-        'Resistance': 108500,
-        'Signal': 'Buy',
-        'RSI': 35,
-        'EMA9': 106400,
-        'EMA21': 106200,
-        'Volume': 50000000,
-        'Expert Advice': 'Buy on support',
-        'Trade Type': 'Scalping',
-    })
-    df_result = pd.DataFrame(signal_rows)
+        print("[WARNING] No valid signals. Adding BTC dummy row.")
+        signal_rows.append({
+            'Symbol': 'BTC',
+            'Strategy': 'Scalping',
+            'Score': 5,
+            'TP': 108000,
+            'SL': 105000,
+            'Buy Price': 106500,
+            'Support': 105000,
+            'Resistance': 108500,
+            'Signal': 'Buy',
+            'RSI': 35,
+            'EMA9': 106400,
+            'EMA21': 106200,
+            'Volume': 50000000,
+            'Expert Advice': 'Buy on support',
+            'Trade Type': 'Scalping',
+        })
+
+    return pd.DataFrame(signal_rows)
 
     # === Dynamic Filtering and Ranking Logic ===
     df_filtered = df_result[(df_result['EMA9'] > df_result['EMA21']) & (df_result['Signal'] != 'WAIT')]
