@@ -4,6 +4,7 @@ from signal_engine import generate_all_signals
 from plot_chart import generate_mini_chart
 from websocket_client import start_websocket_client
 from ready_to_trade import get_ready_to_trade_data
+print("[⚡] WebSocket thread launched")
 
 st.set_page_config(page_title="Nobu AI Terminal Pro v0.2", layout="wide")
 
