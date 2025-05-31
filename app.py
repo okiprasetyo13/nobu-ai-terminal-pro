@@ -15,27 +15,27 @@ st.title("📡 Nobu AI Terminal Pro – Expert Scalping Terminal v0.2")
 # Live Scalping Signal Table
 st.subheader("📈 Live Scalping Signal Table (Real-Time)")
 signal_data = generate_all_signals()
-if not signal_data.empty:
-    for idx, row in signal_data.iterrows():
-        with st.container():
-            col1, col2 = st.columns([2, 5])
-            with col1:
-                st.markdown(f"**{row['Symbol']} – ${row['Current Price']:.8f}**")
-                st.markdown(f"RSI: {row['RSI']:.2f}")
-                st.markdown(f"Signal: `{row['Signal']}`")
-                st.markdown(f"Score: {row['Score']}")
-                st.markdown(f"Support: {row['Support']}")
-                st.markdown(f"Resistance: {row['Resistance']}")
-                st.markdown(f"Buy Price: {row['Buy Price']}")
-                st.markdown(f"TP: {row['Take Profit']} | SL: {row['Stop Loss']}")
-                st.markdown(f"Strategy: `{row['Strategy']}`")
-                st.markdown(f"Advice: 📌 _{row['Advice']}_")
-            with col2:
-                st.image(
-                generate_mini_chart(row["Price History"], row["Symbol"]),
+for idx, row in signal_data.iterrows():
+    with st.expander(f"{row['Symbol']} — ${row['Current Price']:.8f}", expanded=True):
+        col1, col2 = st.columns([2, 5])
+
+        with col1:
+            st.markdown(f"**RSI**: {row['RSI']:.2f}")
+            st.markdown(f"**Signal**: `{row['Signal']}`")
+            st.markdown(f"**Score**: {row['Score']}")
+            st.markdown(f"**Support**: {row['Support']}")
+            st.markdown(f"**Resistance**: {row['Resistance']}")
+            st.markdown(f"**Buy Price**: {row['Buy Price']}")
+            st.markdown(f"**TP**: {row['Take Profit']} | **SL**: {row['Stop Loss']}")
+            st.markdown(f"**Strategy**: 🧠 `{row['Strategy']}`")
+            st.markdown(f"**Advice**: 📌 *{row['Advice']}*")
+
+        with col2:
+            st.image(
+                generate_mini_chart(row["Price History"]),
                 caption="Mini Chart",
                 use_column_width=True
-                )
+            )
 
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
