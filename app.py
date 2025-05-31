@@ -15,27 +15,33 @@ st.title("📡 Nobu AI Terminal Pro – Expert Scalping Terminal v0.2")
 # Live Scalping Signal Table
 st.subheader("📈 Live Scalping Signal Table (Real-Time)")
 signal_data = generate_all_signals()
-for idx, row in signal_data.iterrows():
-    with st.expander(f"{row['Symbol']} — ${row['Current Price']:.8f}", expanded=True):
-        col1, col2 = st.columns([2, 5])
+# 🧠 Expert One-Glance Signal Table
+st.subheader("📊 Expert Signal Table (One-Glance View)")
 
-        with col1:
-            st.markdown(f"**RSI**: {row['RSI']:.2f}")
-            st.markdown(f"**Signal**: `{row['Signal']}`")
-            st.markdown(f"**Score**: {row['Score']}")
-            st.markdown(f"**Support**: {row['Support']}")
-            st.markdown(f"**Resistance**: {row['Resistance']}")
-            st.markdown(f"**Buy Price**: {row['Buy Price']}")
-            st.markdown(f"**TP**: {row['Take Profit']} | **SL**: {row['Stop Loss']}")
-            st.markdown(f"**Strategy**: 🧠 `{row['Strategy']}`")
-            st.markdown(f"**Advice**: 📌 *{row['Advice']}*")
+# Headers
+cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.8, 2.5])
+headers = [
+    "Symbol", "Strategy", "RSI", "Score", "Signal",
+    "Price", "TP", "SL", "Advice", "Chart"
+]
+for col, header in zip(cols, headers):
+    col.markdown(f"**{header}**")
 
-        with col2:
-            st.image(
-                generate_mini_chart(row["Price History"]),
-                caption="Mini Chart",
-                use_column_width=True
-            )
+# Rows
+for _, row in signal_data.iterrows():
+    chart = generate_mini_chart(row["Price History"])
+
+    cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.8, 2.5])
+    cols[0].markdown(f"🪙 {row['Symbol']}")
+    cols[1].markdown(f"`{row['Strategy']}`")
+    cols[2].markdown(f"{row['RSI']:.2f}")
+    cols[3].markdown(f"🧠 {row['Score']}")
+    cols[4].markdown(f"`{row['Signal']}`")
+    cols[5].markdown(f"${row['Current Price']:.2f}")
+    cols[6].markdown(f"{row['Take Profit']}")
+    cols[7].markdown(f"{row['Stop Loss']}")
+    cols[8].markdown(f"📌 *{row['Advice']}*")
+    cols[9].image(chart, use_column_width=True)
             
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
