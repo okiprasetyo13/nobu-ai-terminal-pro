@@ -19,10 +19,10 @@ signal_data = generate_all_signals()
 st.subheader("📊 Expert Signal Table (One-Glance View)")
 
 # Headers
-cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.8, 2.5])
+cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
 headers = [
     "Symbol", "Strategy", "RSI", "Score", "Signal",
-    "Price", "TP", "SL", "Advice", "Chart"
+    "Price", "TP", "SL", "Resistance", "Advice", "Chart"
 ]
 for col, header in zip(cols, headers):
     col.markdown(f"**{header}**")
@@ -30,18 +30,19 @@ for col, header in zip(cols, headers):
 # Rows
 for _, row in signal_data.iterrows():
     chart = generate_mini_chart(row["Price History"])
+    cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
 
-    cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.8, 2.5])
     cols[0].markdown(f"🪙 {row['Symbol']}")
     cols[1].markdown(f"`{row['Strategy']}`")
     cols[2].markdown(f"{row['RSI']:.2f}")
     cols[3].markdown(f"🧠 {row['Score']}")
     cols[4].markdown(f"`{row['Signal']}`")
     cols[5].markdown(f"${row['Current Price']:.2f}")
-    cols[6].markdown(f"{row['Take Profit']}")
-    cols[7].markdown(f"{row['Stop Loss']}")
-    cols[8].markdown(f"📌 *{row['Advice']}*")
-    cols[9].image(chart, use_column_width=True)
+    cols[6].markdown(row["Take Profit"])
+    cols[7].markdown(row["Stop Loss"])
+    cols[8].markdown(f"🧱 {row['Resistance']}")   # ✅ ADDED Resistance
+    cols[9].markdown(f"📌 *{row['Advice']}*")
+    cols[10].image(chart, use_column_width=True)
             
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
