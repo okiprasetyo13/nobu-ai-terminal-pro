@@ -127,6 +127,69 @@ def generate_all_signals():
     	'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
         'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
     ]
+    
+    # 🚀 Process BTC and ETH first, allow them to bypass filters
+    for symbol in priority_symbols:
+        try:
+            df = get_m1_ohlcv(symbol)
+            if df is None or df.empty or len(df) < 21:
+                print(f"[⚠️] Skipping {symbol}: no data")
+                continue
+
+            # === Indicators
+            df["EMA9"] = EMAIndicator(df["close"], window=9).ema_indicator()
+            df["EMA21"] = EMAIndicator(df["close"], window=21).ema_indicator()
+            df["RSI"] = RSIIndicator(df["close"], window=14).rsi()
+            macd = MACD(df["close"])
+            df["MACD"] = macd.macd()
+            df["MACD_SIGNAL"] = macd.macd_signal()
+
+            latest = df.iloc[-1]
+            support = round(find_last_local_min(df), 8)
+            resistance = round(find_last_local_max(df), 8)
+            entry = support * 1.01
+            sl = support * 0.985
+            tp = resistance
+
+            score = 0
+            if latest["EMA9"] > latest["EMA21"]:
+                score += 1
+            if latest["RSI"] < 30:
+                score += 1
+            elif latest["RSI"] > 70:
+                score -= 1
+            if latest["MACD"] > latest["MACD_SIGNAL"]:
+                score += 1
+            else:
+                score -= 1
+
+            signal = "Buy" if latest["RSI"] < 35 and latest["EMA9"] > latest["EMA21"] else "Wait"
+            advice = "📌 Buy on support" if signal == "Buy" else "Watch for entry"
+            strategy = "Scalping"
+
+            row = {
+                "Symbol": symbol,
+                "Strategy": strategy,
+                "Score": score,
+                "Signal": signal,
+                "Buy Price": round(entry, 4),
+                "Recommended Buy": round(support * 1.01, 4),
+                "Take Profit": round(tp, 4),
+                "Stop Loss": round(sl, 4),
+                "Support": round(support, 4),
+                "Resistance": round(resistance, 4),
+                "Current Price": round(latest["close"], 4),
+                "RSI": round(latest["RSI"], 2),
+                "EMA9": round(latest["EMA9"], 2),
+                "EMA21": round(latest["EMA21"], 2),
+                "Advice": advice,
+                "Price History": df["close"].tail(30).tolist(),
+            }
+            signal_rows.append(row)
+            print(f"[✅ BTC/ETH] Signal added for {symbol}")
+
+        except Exception as e:
+            print(f"[❌ BTC/ETH Error] {symbol}: {e}")
 
     for symbol in symbol_list:
         try:
