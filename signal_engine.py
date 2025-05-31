@@ -151,6 +151,15 @@ symbol_list = [
     'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
 ]
 
+# External live price fetcher
+def get_live_price(symbol):
+    url = f"https://nobu-fastapi-price.onrender.com/price/{symbol}"
+    try:
+        res = requests.get(url).json()
+        return float(res["price"])
+    except:
+        return random.randint(10000, 60000)
+
 def generate_all_signals():
     import pandas as pd
     import random
