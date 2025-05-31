@@ -141,8 +141,8 @@ def generate_all_signals():
             df["MACD_SIGNAL"] = macd.macd_signal()
 
             latest = df.iloc[-1]
-            support = round(min(df["close"].iloc[-10:]), 8)
-            resistance = round(max(df["close"].iloc[-10:]), 8)
+            support = round(find_last_local_min(df), 8)
+            resistance = round(find_last_local_max(df), 8)
             entry = support * 1.01
             sl = support * 0.985
             tp = resistance
