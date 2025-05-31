@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 from signal_engine import generate_all_signals
-from plot_chart import generate_mini_chart
+from plot_chart import generate_expert_chart
 from websocket_client import start_websocket_client
 from ready_to_trade import get_ready_to_trade_data
 from websocket_client import launch_websocket_thread
