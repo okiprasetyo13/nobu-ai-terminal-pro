@@ -39,10 +39,10 @@ signal_data = generate_all_signals()
 st.subheader("📊 Expert Signal Table (One-Glance View)")
 
 # Headers
-cols = st.columns([1.1, 1.1, 1.1, 1, 1, 1.3, 1.3, 1.1, 1.1, 1.8, 2.5, 2.5])
+cols = st.columns([1.1, 1.1, 1.1, 1, 1, 1.3, 1.3, 1.1, 1.1, 1.2, 1.8, 2.5, 2.5])
 headers = [
-    "Symbol", "Strategy", "RSI", "Volume", "Score", "Signal",
-    "Price", "Recommended Buy", "TP", "SL", "Resistance", "Advice", "Chart"
+    "Symbol", "Strategy", "RSI", "Score", "Signal",
+    "Price", "Recommended Buy", "TP", "SL", "Support Zone", "Resistance", "Advice", "Chart"
 ]
 for col, header in zip(cols, headers):
     col.markdown(f"**{header}**")
