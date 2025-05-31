@@ -207,14 +207,14 @@ def generate_all_signals():
             # === Volatility & Breakout Filter (define latest FIRST!) ===
             latest = df.iloc[-1]
             df["volatility"] = df["close"].rolling(window=10).std()
-            if df["volatility"].iloc[-1] < 0.002 * latest["close"]:
+            low_volatility = df["volatility"].iloc[-1] < 0.002 * latest["close"]
+            if low_volatility:
                 print(f"[⚠️ {symbol}] Rejected: low volatility")
-                continue
-
             recent_high = df["close"].rolling(window=15).max().iloc[-1]
-            if latest["close"] < recent_high * 0.98:
+            no_breakout = latest["close"] < recent_high * 0.98
+            if no_breakout:
                 print(f"[📉 {symbol}] No breakout above recent high")
-                continue
+                
             support = round(find_last_local_min(df), 8)
             resistance = round(find_last_local_max(df), 8)
             print(f"[🔍 {symbol}] Support={support}, Resistance={resistance}")
