@@ -57,7 +57,7 @@ for _, row in signal_data.iterrows():
     # ✅ Step 3: Compute volume condition
     volume = row.get("Volume", 0)
     volume_avg = row.get("Volume Avg", 0)
-    volume_status = "High" if volume > volume_avg else "Low"
+    volume_status = "🟢 High" if volume > volume_avg else "🔴 Low"
     live_price = get_live_price(row["Symbol"])
     price_display = f"${live_price:,.2f}" if live_price else f"${row['Current Price']:.2f}"
 
