@@ -165,6 +165,10 @@ def generate_all_signals():
             df["MACD_SIGNAL"] = macd.macd_signal()
 
             latest = df.iloc[-1]
+            df["volume_avg"] = df["volume"].rolling(window=10).mean()
+            volume = latest["volume"]
+            volume_avg = latest["volume_avg"]
+            volume_status = "📈 High" if volume > volume_avg else "📉 Low"
             support = round(find_last_local_min(df), 8)
             resistance = round(find_last_local_max(df), 8)
             entry = support * 1.01
