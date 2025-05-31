@@ -5,7 +5,6 @@ from io import BytesIO
 def generate_mini_chart(prices, support=None, resistance=None):
     """
     Generates a mini inline chart for display in the Signal Table.
-
     :param prices: List of recent closing prices
     :param support: Optional support level line
     :param resistance: Optional resistance level line
@@ -28,4 +27,6 @@ def generate_mini_chart(prices, support=None, resistance=None):
     buffer.seek(0)
     image_base64 = base64.b64encode(buffer.read()).decode()
     plt.close(fig)
-    return f'<img src="data:image/png;base64,{image_base64}" width="120">'
+
+    # ✅ Streamlit expects a raw base64 string, not <img> HTML
+    return f"data:image/png;base64,{image_base64}"
