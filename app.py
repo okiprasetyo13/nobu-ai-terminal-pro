@@ -52,7 +52,8 @@ from ta.momentum import RSIIndicator  # ✅ Make sure this is imported at the to
 
 # ✅ Inside signal_data.iterrows loop
 for _, row in signal_data.iterrows():
-    cols = st.columns([1.1, 1.1, 1.1, 1, 1, 1.3, 1.3, 1.1, 1.1, 1.2, 1.8, 2.5, 2.5])
+    cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.1, 1.3, 1.1, 1.8, 2.5])
+#                ─────────────────────────────────────────────── ↑ must match exactly 14 columns
     
     # ✅ Step 3: Compute volume condition
     volume = row.get("Volume", 0)
