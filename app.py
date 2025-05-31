@@ -36,7 +36,7 @@ for idx, row in signal_data.iterrows():
                 caption="Mini Chart",
                 use_column_width=True
             )
-
+            
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
 ready_data = get_ready_to_trade_data()
