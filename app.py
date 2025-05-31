@@ -56,7 +56,6 @@ df_history.index = pd.date_range(end=pd.Timestamp.now(), periods=len(df_history)
 
 # Rows
 for _, row in signal_data.iterrows():
-    chart = generate_expert_chart(df_history, row["Symbol"])
     cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
 
     live_price = get_live_price(row["Symbol"])
@@ -72,6 +71,8 @@ for _, row in signal_data.iterrows():
     cols[7].markdown(row["Stop Loss"])
     cols[8].markdown(f"🧱 {row['Resistance']}")
     cols[9].markdown(f"📌 *{row['Advice']}*")
+    #Generate Chart
+    chart = generate_expert_chart(df_history, row["Symbol"])
     cols[10].image("data:image/png;base64," + chart, use_column_width=True)
 
 # Ready to Trade Panel
