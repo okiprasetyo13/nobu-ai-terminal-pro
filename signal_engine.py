@@ -6,6 +6,18 @@ from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator, MACD
 from websocket_client import get_latest_price, get_ohlcv_data
 
+def find_last_local_min(df):
+    for i in range(len(df) - 2, 1, -1):
+        if df['close'].iloc[i] < df['close'].iloc[i - 1] and df['close'].iloc[i] < df['close'].iloc[i + 1]:
+            return df['close'].iloc[i]
+    return df['close'].min()
+
+def find_last_local_max(df):
+    for i in range(len(df) - 2, 1, -1):
+        if df['close'].iloc[i] > df['close'].iloc[i - 1] and df['close'].iloc[i] > df['close'].iloc[i + 1]:
+            return df['close'].iloc[i]
+    return df['close'].max()
+
 def get_m1_ohlcv(symbol):
     url = f"https://nobu-fastapi-price.onrender.com/ohlcv/{symbol}"
     try:
