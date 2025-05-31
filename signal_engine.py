@@ -1,3 +1,11 @@
+import requests
+import random
+import pandas as pd   # ✅ Keep this here globally
+import numpy as np
+from ta.momentum import RSIIndicator
+from ta.trend import EMAIndicator, MACD
+from websocket_client import get_latest_price, get_ohlcv_data
+
 def get_live_price(symbol):
     url = f"https://nobu-fastapi-price.onrender.com/price/{symbol}"
     try:
