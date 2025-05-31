@@ -1,65 +1,50 @@
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
 import pandas as pd
+from ta.trend import EMAIndicator, MACD
 from io import BytesIO
 import base64
 
 def generate_expert_chart(df, symbol):
-    # Ensure datetime index
-    df = df.copy()
-    df.index = pd.to_datetime(df.index)
+    df = pd.DataFrame(df)
+    df.columns = ['close']
+    df["open"] = df["close"].shift(1).fillna(method="bfill")
+    df["high"] = df["close"] + 2
+    df["low"] = df["close"] - 2
+    df["EMA9"] = EMAIndicator(df["close"], window=9).ema_indicator()
+    df["EMA21"] = EMAIndicator(df["close"], window=21).ema_indicator()
+    macd = MACD(df["close"])
+    df["MACD"] = macd.macd()
+    df["MACD_SIGNAL"] = macd.macd_signal()
+    df.index = pd.date_range(end=pd.Timestamp.now(), periods=len(df), freq="1min")
 
-    # Plotting setup
-    fig = plt.figure(figsize=(6, 5))
-    ax_price = plt.subplot2grid((5, 1), (0, 0), rowspan=3)
-    ax_rsi = plt.subplot2grid((5, 1), (3, 0), rowspan=1)
-    ax_vol = plt.subplot2grid((5, 1), (4, 0), rowspan=1)
+    # Create a 2-panel chart
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 5), sharex=True, height_ratios=[3, 1])
 
-    # Candlestick chart
-    ohlc = df[['open', 'high', 'low', 'close']].copy()
-    candle_colors = df['close'] > df['open']
-    ax_price.bar(df.index, df['high'] - df['low'], bottom=df['low'], color='gray', linewidth=0.5)
-    ax_price.bar(df.index, df['close'] - df['open'], bottom=df['open'],
-                 color=candle_colors.map({True: 'green', False: 'red'}), width=0.0015)
+    # Price panel
+    ax1.plot(df.index, df["close"], label="Price", linewidth=2, color="blue")
+    ax1.plot(df.index, df["EMA9"], label="EMA9", linestyle="--", color="orange")
+    ax1.plot(df.index, df["EMA21"], label="EMA21", linestyle="--", color="purple")
+    ax1.fill_between(df.index, df["low"], df["high"], color="gray", alpha=0.2, label="Range")
+    ax1.axhline(df["close"].iloc[-1] + 5, color="green", linestyle=":", label="TP")
+    ax1.axhline(df["close"].iloc[-1] - 5, color="red", linestyle=":", label="SL")
+    ax1.set_title(f"{symbol} Price + EMA + TP/SL")
+    ax1.legend()
+    ax1.grid(True)
 
-    # EMA lines
-    ax_price.plot(df.index, df['EMA9'], label='EMA9', linestyle='--')
-    ax_price.plot(df.index, df['EMA21'], label='EMA21', linestyle='-.')
-
-    # Support & Resistance (last 10 candles)
-    support = min(df['low'][-10:])
-    resistance = max(df['high'][-10:])
-    ax_price.axhline(support, color='blue', linestyle='--', linewidth=1, label='Support')
-    ax_price.axhline(resistance, color='orange', linestyle='--', linewidth=1, label='Resistance')
-
-    ax_price.set_title(f"{symbol} Expert Chart")
-    ax_price.legend(loc="upper left")
-    ax_price.grid(True)
-
-    # RSI plot
-    ax_rsi.plot(df.index, df['RSI'], color='purple')
-    ax_rsi.axhline(70, color='red', linestyle='--', linewidth=0.8)
-    ax_rsi.axhline(30, color='green', linestyle='--', linewidth=0.8)
-    ax_rsi.set_ylabel("RSI")
-    ax_rsi.grid(True)
-
-    # Volume bars
-    ax_vol.bar(df.index, df['volume'], color='skyblue')
-    ax_vol.set_ylabel("Volume")
-    ax_vol.grid(True)
-
-    # Formatting
-    for ax in [ax_price, ax_rsi, ax_vol]:
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        ax.xaxis.set_major_locator(MaxNLocator(nbins=4))
-        plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+    # MACD panel
+    ax2.plot(df.index, df["MACD"], label="MACD", color="teal")
+    ax2.plot(df.index, df["MACD_SIGNAL"], label="Signal", linestyle="--", color="red")
+    ax2.axhline(0, linestyle=":", color="gray")
+    ax2.set_title("MACD Indicator")
+    ax2.legend()
+    ax2.grid(True)
 
     plt.tight_layout()
 
-    # Encode to base64
-    buf = BytesIO()
-    plt.savefig(buf, format="png")
+    # Convert to base64
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    img_base64 = base64.b64encode(buffer.read()).decode()
     plt.close(fig)
-    buf.seek(0)
-    return base64.b64encode(buf.getvalue()).decode("utf-8")
+    return img_base64
