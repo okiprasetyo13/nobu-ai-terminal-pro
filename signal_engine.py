@@ -154,7 +154,7 @@ def generate_all_signals():
 
     signal_rows = []
 
-    # TEMP: Manually use 20 scalping coins
+    # ✅ 20 coins manually listed for test
     symbol_list = [
         'BTC', 'ETH', 'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
         'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
@@ -164,66 +164,38 @@ def generate_all_signals():
         print(f"[CHECKING] {symbol} - Generating signal...")
 
         try:
-            # TODO: Replace this with real signal logic
-            # Dummy signal logic for now
-            score = 4
-            strategy = "Scalping"
+            # Dummy price data for now
+            price_history = [106000 + i * 50 for i in range(10)]
 
-            if score >= 4:
-                row = {
-                    'Symbol': symbol,
-                    'Strategy': strategy,
-                    'Score': score,
-                    'Take Profit': 108000,
-                    'Stop Loss': 105000,
-                    'Buy Price': 106500,
-                    'Support': 105000,
-                    'Resistance': 108500,
-                    'Current Price': 106500,
-                    'Signal': 'Buy',
-                    'RSI': 35,
-                    'EMA9': 106400,
-                    'EMA21': 106200,
-                    'Volume': 50000000,
-                    'Advice': 'Buy on support',
-                    'Trade Type': 'Scalping',
-                    'Price History': [106000, 106200, 106400, 106500, 106300],  # added for mini chart
-                }
-                signal_rows.append(row)
-                print(f"[RESULT] {symbol} ✅ Added to signals")
-            else:
-                print(f"[SKIPPED] {symbol} ❌ Score too low")
+            row = {
+                'Symbol': symbol,
+                'Strategy': 'Scalping',
+                'Score': 4,
+                'Buy Price': 106500,
+                'Take Profit': 108000,
+                'Stop Loss': 105000,
+                'Support': 105000,
+                'Resistance': 108500,
+                'Current Price': 106500,
+                'Signal': 'Buy',
+                'RSI': 35,
+                'EMA9': 106400,
+                'EMA21': 106200,
+                'Volume': 50000000,
+                'Advice': 'Buy on support',
+                'Trade Type': 'Scalping',
+                'Price History': price_history,
+            }
+
+            signal_rows.append(row)
+            print(f"[RESULT] ✅ {symbol} added to signal list.")
 
         except Exception as e:
-            print(f"[ERROR] {symbol} crashed: {e}")
+            print(f"[ERROR] ❌ {symbol} failed: {e}")
 
-    # Final log
-    print(f"[SUMMARY] Total signals generated: {len(signal_rows)}")
-
-    if not signal_rows:
-        print("[WARNING] No valid signals. Adding BTC dummy row.")
-        signal_rows.append({
-            'Symbol': 'BTC',
-            'Strategy': 'Scalping',
-            'Score': 5,
-            'Take Profit': 108000,
-            'Stop Loss': 105000,
-            'Buy Price': 106500,
-            'Support': 105000,
-            'Resistance': 108500,
-            'Current Price': 106500,
-            'Signal': 'Buy',
-            'RSI': 35,
-            'EMA9': 106400,
-            'EMA21': 106200,
-            'Volume': 50000000,
-            'Expert Advice': 'Buy on support',
-            'Trade Type': 'Scalping',
-            'Price History': [106000, 106200, 106400, 106500, 106300],  # added for mini chart
-        })
-
+    print(f"[SUMMARY] Generated {len(signal_rows)} signals.")
     return pd.DataFrame(signal_rows)
-
+    
     # === Dynamic Filtering and Ranking Logic ===
     df_filtered = df_result[(df_result['EMA9'] > df_result['EMA21']) & (df_result['Signal'] != 'WAIT')]
     df_filtered = df_filtered.sort_values(by="Volume", ascending=False).head(20)
