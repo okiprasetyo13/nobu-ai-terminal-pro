@@ -90,18 +90,24 @@ for _, row in signal_data.iterrows():
     cols[10].markdown(f"🍫 {row['Resistance']}")
     cols[11].markdown(f"📌 *{row['Advice']}*")
     cols[12].markdown(f"📊 {volume_status} Volume**")
-    # --- Optional Chart Size Dropdown ---
+    # ✅ Collapsible chart for this row
+with st.expander(f"📈 Show chart for {row['Symbol']}", expanded=False):
     chart_size = st.selectbox(
-    	"Chart Size",
+        "Chart Size",
         ["Small", "Medium", "Large"],
         key=f"chart_size_{row['Symbol']}"
     )
-    # Set width
+
+    # Set chart width based on user selection
     width = 260
     if chart_size == "Medium":
         width = 360
     elif chart_size == "Large":
         width = 480
+
+    # Generate and show chart
+    chart = generate_scalping_chart(df_history, row["Symbol"])
+    st.image("data:image/png;base64," + chart, width=width)
     
     # Generate and show chart below the row
     chart = generate_scalping_chart(df_history, row["Symbol"])
