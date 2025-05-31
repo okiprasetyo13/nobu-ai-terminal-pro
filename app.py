@@ -83,11 +83,12 @@ for _, row in signal_data.iterrows():
     
     cols[7].markdown(row["Take Profit"])
     cols[8].markdown(row["Stop Loss"])
-    cols[9].markdown(f"🍫 {row['Resistance']}")
-    cols[10].markdown(f"📌 *{row['Advice']}*")
-    cols[11].markdown(f"📊 **{volume_status} Volume**")
+    cols[9].markdown(f"{row['Support Zone']}")                     # ✅ NEW
+    cols[10].markdown(f"🍫 {row['Resistance']}")
+    cols[11].markdown(f"📌 *{row['Advice']}*")
+    cols[12].markdown(f"📊 {volume_status} Volume**")
     chart = generate_expert_chart(df_history, row["Symbol"])
-    cols[12].image("data:image/png;base64," + chart, use_column_width=True)
+    cols[13].image("data:image/png;base64," + chart, use_column_width=True)
 
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
