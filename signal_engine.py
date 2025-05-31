@@ -187,6 +187,7 @@ def generate_all_signals():
                     'Volume': 50000000,
                     'Advice': 'Buy on support',
                     'Trade Type': 'Scalping',
+                    'Price History': [106000, 106200, 106400, 106500, 106300],  # added for mini chart
                 }
                 signal_rows.append(row)
                 print(f"[RESULT] {symbol} ✅ Added to signals")
