@@ -45,7 +45,7 @@ for col, header in zip(cols, headers):
 
 # Rows
 for _, row in signal_data.iterrows():
-    chart = generate_mini_chart(row["Price History"])
+    chart = generate_expert_chart(df_history, row["Symbol"])
     cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
 
     live_price = get_live_price(row["Symbol"])
