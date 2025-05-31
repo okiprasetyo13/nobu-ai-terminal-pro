@@ -185,7 +185,7 @@ def generate_all_signals():
                     'EMA9': 106400,
                     'EMA21': 106200,
                     'Volume': 50000000,
-                    'Expert Advice': 'Buy on support',
+                    'Advice': 'Buy on support',
                     'Trade Type': 'Scalping',
                 }
                 signal_rows.append(row)
