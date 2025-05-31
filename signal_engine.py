@@ -175,18 +175,16 @@ def generate_all_signals():
             print(f"[❌] Error processing {symbol}: {e}")
 
     df = pd.DataFrame(signal_rows)
-
-# Sort remaining coins by Score
-df_filtered = df.sort_values(by="Score", ascending=False)
-
-# Separate BTC and ETH if they exist
-btc_row = df_filtered[df_filtered['Symbol'] == 'BTC']
-eth_row = df_filtered[df_filtered['Symbol'] == 'ETH']
-
-# Remove them to prevent duplication
-df_filtered = df_filtered[~df_filtered['Symbol'].isin(['BTC', 'ETH'])]
-
-# Reorder with BTC and ETH at the top
-df_final = pd.concat([btc_row, eth_row, df_filtered], ignore_index=True)
-
-return df_final
+    # Sort remaining coins by Score
+    df_filtered = df.sort_values(by="Score", ascending=False)
+    # Separate BTC and ETH if they exist
+    btc_row = df_filtered[df_filtered['Symbol'] == 'BTC']
+    eth_row = df_filtered[df_filtered['Symbol'] == 'ETH']
+    
+    # Remove them to prevent duplication
+    df_filtered = df_filtered[~df_filtered['Symbol'].isin(['BTC', 'ETH'])]
+    
+    # Reorder with BTC and ETH at the top
+    df_final = pd.concat([btc_row, eth_row, df_filtered], ignore_index=True)
+    
+    return df_final
