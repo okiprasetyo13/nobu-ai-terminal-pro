@@ -90,18 +90,22 @@ for _, row in signal_data.iterrows():
     cols[10].markdown(f"🍫 {row['Resistance']}")
     cols[11].markdown(f"📌 *{row['Advice']}*")
     cols[12].markdown(f"📊 {volume_status} Volume**")
-    chart = generate_scalping_chart(df_history, row["Symbol"])
+    # --- Optional Chart Size Dropdown ---
     chart_size = st.selectbox(
     	"Chart Size",
-    	["Small", "Medium", "Large"],
+        ["Small", "Medium", "Large"],
         key=f"chart_size_{row['Symbol']}"
     )
-    width = 240  # default
+    # Set width
+    width = 260
     if chart_size == "Medium":
-        width = 320
+        width = 360
     elif chart_size == "Large":
-        width = 400
-    cols[13].image("data:image/png;base64," + chart, width=width)
+        width = 480
+    
+    # Generate and show chart below the row
+    chart = generate_scalping_chart(df_history, row["Symbol"])
+    st.image("data:image/png;base64," + chart, width=width)
 
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
