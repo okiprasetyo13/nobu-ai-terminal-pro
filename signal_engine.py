@@ -54,6 +54,16 @@ def analyze_symbol(symbol):
 
         # === Signal Decision Logic ===
         latest = df.iloc[-1]
+        # === Volatility Check ===
+        df["volatility"] = df["close"].rolling(window=10).std()
+        if df["volatility"].iloc[-1] < 0.002 * latest["close"]:
+            print(f"[⚠️ {symbol}] Rejected: low volatility")
+            continue
+        # === Breakout Check ===
+recent_high = df["close"].rolling(window=15).max().iloc[-1]
+if latest["close"] < recent_high * 0.98:
+    print(f"[📉 {symbol}] No breakout above recent high")
+    continue
         price = latest['close']
         rsi = latest['RSI']
         volume = latest['volume']
