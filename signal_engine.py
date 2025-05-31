@@ -145,10 +145,8 @@ def generate_all_signals():
     signal_rows = []
     # ✅ Always prioritize BTC and ETH first
     priority_symbols = ['BTC', 'ETH']
-    other_symbols = [
-    	'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
-        'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
-    ]
+    other_symbols = get_top_coinbase_symbols()
+    other_symbols = [s for s in other_symbols if s not in priority_symbols]
     
     # 🚀 Process BTC and ETH first, allow them to bypass filters
     for symbol in priority_symbols:
