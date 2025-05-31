@@ -40,6 +40,39 @@ def find_last_local_max(df):
             return df['close'].iloc[i]
     return df['close'].max()
 
+def patch_signal_row(symbol, df, latest, entry, sl, tp, support, resistance, score, signal, advice, strategy):
+    price = latest["close"]
+    
+    # === Support/Resistance Proximity Detection ===
+    if price <= support * 1.01:
+        support_zone = "🟢 Near Support"
+    elif price >= resistance * 0.99:
+        support_zone = "🔴 Near Resistance"
+    else:
+        support_zone = "⚪ Neutral"
+
+    # ✅ Construct signal row with new column
+    row = {
+        "Symbol": symbol,
+        "Strategy": strategy,
+        "Score": score,
+        "Signal": signal,
+        "Buy Price": round(entry, 4),
+        "Recommended Buy": round(support * 1.01, 4),
+        "Take Profit": round(tp, 4),
+        "Stop Loss": round(sl, 4),
+        "Support": round(support, 4),
+        "Resistance": round(resistance, 4),
+        "Support Zone": support_zone,  # ✅ NEW COLUMN
+        "Current Price": round(price, 4),
+        "RSI": round(latest["RSI"], 2),
+        "EMA9": round(latest["EMA9"], 2),
+        "EMA21": round(latest["EMA21"], 2),
+        "Advice": advice,
+        "Price History": df["close"].tail(30).tolist(),
+    }
+    return row
+
 def get_m1_ohlcv(symbol):
     url = f"https://nobu-fastapi-price.onrender.com/ohlcv/{symbol}"
     try:
