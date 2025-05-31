@@ -167,9 +167,9 @@ def generate_all_signals():
             print("[generate_all_signals] No valid signals generated.")
             return pd.DataFrame()
 
-	print(f"[SUMMARY] Generated {len(signal_rows)} signals.")
+			print(f"[SUMMARY] Generated {len(signal_rows)} signals.")
     if not signal_rows:
-    print("[WARNING] No signals generated. Adding dummy BTC row.")
+			print("[WARNING] No signals generated. Adding dummy BTC row.")
     signal_rows.append({
         'Symbol': 'BTC',
         'Strategy': 'Scalping',
