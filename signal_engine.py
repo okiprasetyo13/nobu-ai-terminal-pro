@@ -220,3 +220,5 @@ def get_live_price(symbol):
     # Final sorting by Score
     df_ranked = df_filtered.sort_values(by="Score", ascending=False).reset_index(drop=True)
     return df_ranked
+
+__all__ = ['generate_all_signals']
