@@ -191,7 +191,7 @@ def generate_all_signals():
         except Exception as e:
             print(f"[❌ BTC/ETH Error] {symbol}: {e}")
 
-    for symbol in symbol_list:
+    for symbol in other_symbols:
         try:
             df = get_m1_ohlcv(symbol)
             if df is None or df.empty or len(df) < 21:
