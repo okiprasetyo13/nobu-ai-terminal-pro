@@ -166,6 +166,7 @@ def generate_all_signals():
             # Generate a base price per symbol
             coinbase_symbol = f"{symbol}-USD"
             base_price = get_latest_price(coinbase_symbol) or random.randint(10000, 60000)
+            print(f"[🔄] {symbol} live price = {base_price}")
             price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
 
             row = {
