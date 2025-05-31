@@ -40,7 +40,7 @@ st.subheader("📊 Expert Signal Table (One-Glance View)")
 cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
 headers = [
     "Symbol", "Strategy", "RSI", "Score", "Signal",
-    "Price", "TP", "SL", "Resistance", "Advice", "Chart"
+    "Price", "Recommended Buy", "TP", "SL", "Resistance", "Advice", "Chart"
 ]
 for col, header in zip(cols, headers):
     col.markdown(f"**{header}**")
