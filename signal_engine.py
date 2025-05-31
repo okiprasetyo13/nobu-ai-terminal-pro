@@ -224,26 +224,7 @@ def generate_all_signals():
             advice = "📌 Buy on support" if signal == "Buy" else "Watch for entry"
             strategy = "Scalping"
 
-            row = {
-                "Symbol": symbol,
-                "Strategy": strategy,
-                "Score": score,
-                "Signal": signal,
-                "Buy Price": round(entry, 4),
-                "Recommended Buy": round(support * 1.01, 4),
-                "Take Profit": round(tp, 4),
-                "Stop Loss": round(sl, 4),
-                "Support": round(support, 4),
-                "Resistance": round(resistance, 4),
-                "Current Price": round(latest["close"], 4),
-                "RSI": round(latest["RSI"], 2),
-                "EMA9": round(latest["EMA9"], 2),
-                "EMA21": round(latest["EMA21"], 2),
-                "Volume": int(volume),
-                "Volume Status": volume_status,
-                "Advice": advice,
-                "Price History": df["close"].tail(30).tolist(),
-            }
+            row = patch_signal_row(symbol, df, latest, entry, sl, tp, support, resistance, score, signal, advice, strategy)
             signal_rows.append(row)
             print(f"[✅ BTC/ETH] Signal added for {symbol}")
 
