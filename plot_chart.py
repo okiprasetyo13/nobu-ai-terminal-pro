@@ -1,8 +1,63 @@
-import matplotlib.pyplot as plt
 import pandas as pd
-from ta.trend import EMAIndicator, MACD
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from io import BytesIO
+from ta.momentum import RSIIndicator
+from ta.trend import EMAIndicator, MACD
+import io
 import base64
+
+def generate_scalping_chart(df, symbol=""):
+    try:
+        df = df.copy()
+        df['EMA9'] = EMAIndicator(df['close'], window=9).ema_indicator()
+        df['EMA21'] = EMAIndicator(df['close'], window=21).ema_indicator()
+        df['RSI'] = RSIIndicator(df['close'], window=14).rsi()
+
+        macd = MACD(close=df['close'])
+        df['MACD'] = macd.macd()
+        df['MACD_SIGNAL'] = macd.macd_signal()
+
+        support = df['close'][::-1][(df['close'] < df['close'].shift(1)) & (df['close'] < df['close'].shift(-1))].head(1).values[0]
+        resistance = df['close'][::-1][(df['close'] > df['close'].shift(1)) & (df['close'] > df['close'].shift(-1))].head(1).values[0]
+
+        fig, axs = plt.subplots(3, 1, figsize=(10, 6), sharex=True, gridspec_kw={'height_ratios': [3, 1, 1]})
+
+        # === Candlestick + EMA
+        axs[0].plot(df.index, df['close'], color='white', linewidth=1.2, label='Price')
+        axs[0].plot(df.index, df['EMA9'], label='EMA 9', linewidth=1.1)
+        axs[0].plot(df.index, df['EMA21'], label='EMA 21', linewidth=1.1)
+        axs[0].axhline(support, color='limegreen', linestyle='--', linewidth=1, label='Support')
+        axs[0].axhline(resistance, color='red', linestyle='--', linewidth=1, label='Resistance')
+        axs[0].legend(loc="upper left")
+        axs[0].set_title(f"{symbol} Price Chart with EMA + S/R")
+
+        # === Volume Bars
+        volume_colors = ['green' if c >= o else 'red' for c, o in zip(df['close'], df['open'])]
+        axs[1].bar(df.index, df['volume'], color=volume_colors)
+        axs[1].set_ylabel("Volume")
+
+        # === MACD
+        axs[2].plot(df.index, df['MACD'], label="MACD", color="cyan")
+        axs[2].plot(df.index, df['MACD_SIGNAL'], label="Signal", color="magenta")
+        axs[2].legend(loc="upper left")
+        axs[2].set_ylabel("MACD")
+
+        # === Formatting
+        axs[-1].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        axs[-1].set_xlabel("Time")
+        plt.tight_layout()
+        plt.grid(True)
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png", dpi=150, bbox_inches="tight", facecolor="#111")
+        plt.close(fig)
+        base64_img = base64.b64encode(buf.getvalue()).decode("utf-8")
+        return base64_img
+
+    except Exception as e:
+        print(f"[Chart Error] {symbol}: {e}")
+        return ""
 
 def generate_expert_chart(price_history, symbol):
     # 🔒 Ensure DataFrame structure
