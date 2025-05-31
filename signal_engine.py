@@ -157,6 +157,7 @@ def generate_all_signals():
                 "Score": score,
                 "Signal": signal,
                 "Buy Price": round(entry, 4),
+                "Recommended Buy": round(support * 1.01, 4),
                 "Take Profit": round(tp, 4),
                 "Stop Loss": round(sl, 4),
                 "Support": round(support, 4),
