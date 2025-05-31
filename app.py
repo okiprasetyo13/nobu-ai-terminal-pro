@@ -72,7 +72,7 @@ for _, row in signal_data.iterrows():
     cols[7].markdown(row["Stop Loss"])
     cols[8].markdown(f"🧱 {row['Resistance']}")
     cols[9].markdown(f"📌 *{row['Advice']}*")
-    cols[10].image(chart, use_column_width=True)
+    cols[10].image("data:image/png;base64," + chart, use_column_width=True)
 
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
