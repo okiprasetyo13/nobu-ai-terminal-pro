@@ -8,6 +8,8 @@ from websocket_client import start_websocket_client
 from ready_to_trade import get_ready_to_trade_data
 from websocket_client import launch_websocket_thread
 
+def get_volume_label(volume, volume_avg):
+    return "🟢 High" if volume > volume_avg else "🔴 Low"
 
 launch_websocket_thread()
 print("[⚡] WebSocket thread launched")
