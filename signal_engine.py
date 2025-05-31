@@ -6,6 +6,28 @@ from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator, MACD
 from websocket_client import get_latest_price, get_ohlcv_data
 
+def get_top_coinbase_symbols():
+    try:
+        url = "https://api.exchange.coinbase.com/products"
+        res = requests.get(url).json()
+        usd_pairs = [p for p in res if p.get("quote_currency") == "USD" and p.get("status") == "online"]
+        sorted_pairs = sorted(usd_pairs, key=lambda x: float(x.get("volume_24h", 0)), reverse=True)
+
+        symbols = ["BTC", "ETH"]
+        for item in sorted_pairs:
+            base = item.get("base_currency")
+            if base not in symbols:
+                symbols.append(base)
+            if len(symbols) >= 20:
+                break
+        return symbols
+    except Exception as e:
+        print(f"[❌] Failed to load dynamic symbols: {e}")
+        return [
+            'BTC', 'ETH', 'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
+            'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
+        ]
+
 def find_last_local_min(df):
     for i in range(len(df) - 2, 1, -1):
         if df['close'].iloc[i] < df['close'].iloc[i - 1] and df['close'].iloc[i] < df['close'].iloc[i + 1]:
