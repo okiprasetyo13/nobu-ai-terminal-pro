@@ -64,6 +64,7 @@ def analyze_symbol(symbol):
         if latest["close"] < recent_high * 0.98:
             print(f"[📉 {symbol}] No breakout above recent high")
             continue
+        
         price = latest['close']
         rsi = latest['RSI']
         volume = latest['volume']
