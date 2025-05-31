@@ -206,8 +206,8 @@ def generate_all_signals():
             'Symbol': 'BTC',
             'Strategy': 'Scalping',
             'Score': 5,
-            'TP': 108000,
-            'SL': 105000,
+            'Take Profit': 108000,
+            'Stop Loss': 105000,
             'Buy Price': 106500,
             'Support': 105000,
             'Resistance': 108500,
@@ -219,6 +219,7 @@ def generate_all_signals():
             'Volume': 50000000,
             'Expert Advice': 'Buy on support',
             'Trade Type': 'Scalping',
+            'Price History': [106000, 106200, 106400, 106500, 106300],  # added for mini chart
         })
 
     return pd.DataFrame(signal_rows)
