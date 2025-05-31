@@ -1,7 +1,13 @@
-def generate_all_signals():
-    import pandas as pd
-    import random
+def get_live_price(symbol):
+    url = f"https://nobu-fastapi-price.onrender.com/price/{symbol}"
+    try:
+        res = requests.get(url, timeout=3)
+        return float(res.json()["price"])
+    except Exception as e:
+        print(f"[❌] {symbol} live price error: {e}")
+        return None
 
+def generate_all_signals():
     signal_rows = []
 
     symbol_list = [
@@ -11,9 +17,10 @@ def generate_all_signals():
 
     for symbol in symbol_list:
         try:
-            # Generate a base price per symbol
-            coinbase_symbol = f"{symbol}-USD"
             base_price = get_live_price(symbol)
+            if base_price is None:
+                continue
+
             print(f"[🔄] {symbol} live price = {base_price}")
             price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
 
@@ -43,4 +50,6 @@ def generate_all_signals():
         except Exception as e:
             print(f"[❌] Error processing {symbol}: {e}")
 
-    return pd.DataFrame(signal_rows)
+    df = pd.DataFrame(signal_rows)
+    print(f"[📊] Total signals generated: {len(df)}")
+    return df
