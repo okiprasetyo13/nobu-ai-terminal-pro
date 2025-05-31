@@ -96,8 +96,12 @@ for _, row in signal_data.iterrows():
     	["Small", "Medium", "Large"],
         key=f"chart_size_{row['Symbol']}"
     )
-    chart_width = 280 if chart_size == "Small" else 360 if chart_size == "Medium" else 480
-    st.image("data:image/png;base64," + chart, width=chart_width)
+    width = 240  # default
+    if chart_size == "Medium":
+        width = 320
+    elif chart_size == "Large":
+        width = 400
+    cols[13].image("data:image/png;base64," + chart, width=width)
 
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
