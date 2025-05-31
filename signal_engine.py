@@ -166,7 +166,19 @@ def generate_all_signals():
         try:
             # Generate a base price per symbol
             coinbase_symbol = f"{symbol}-USD"
-            base_price = get_latest_price(coinbase_symbol) or random.randint(10000, 60000)
+            
+            
+            def get_live_price(symbol):
+    			url = f"https://nobu-fastapi-price.onrender.com/price/{symbol}"
+    			try:
+        			res = requests.get(url).json()
+        			return float(res["price"])
+    			except:
+        			return random.randint(10000, 60000)
+
+			base_price = get_live_price(symbol)
+            
+            
             print(f"[🔄] {symbol} live price = {base_price}")
             price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
 
