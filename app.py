@@ -43,17 +43,6 @@ headers = [
 for col, header in zip(cols, headers):
     col.markdown(f"**{header}**")
 
-# Create DataFrame from history
-df_history = pd.DataFrame(row["Price History"], columns=["close"])
-df_history["open"] = df_history["close"].shift(1).fillna(method="bfill")
-df_history["high"] = df_history["close"] + 5
-df_history["low"] = df_history["close"] - 5
-df_history["volume"] = 10000  # static dummy volume
-df_history["EMA9"] = df_history["close"].ewm(span=9).mean()
-df_history["EMA21"] = df_history["close"].ewm(span=21).mean()
-df_history["RSI"] = RSIIndicator(df_history["close"], window=14).rsi()
-df_history.index = pd.date_range(end=pd.Timestamp.now(), periods=len(df_history), freq="1min")
-
 # Rows
 for _, row in signal_data.iterrows():
     cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
