@@ -95,17 +95,17 @@ with st.expander(f"📈 Show chart for {row['Symbol']}", expanded=False):
     chart_size = st.selectbox(
         "Chart Size",
         ["Small", "Medium", "Large"],
+        index=1,  # 👈 Default = Medium
         key=f"chart_size_{row['Symbol']}"
     )
 
-    # Set chart width based on user selection
+    # Set chart width
     width = 260
     if chart_size == "Medium":
         width = 360
     elif chart_size == "Large":
         width = 480
 
-    # Generate and show chart
     chart = generate_scalping_chart(df_history, row["Symbol"])
     st.image("data:image/png;base64," + chart, width=width)
     
