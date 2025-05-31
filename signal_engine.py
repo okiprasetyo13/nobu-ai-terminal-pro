@@ -151,16 +151,6 @@ def generate_all_signals():
             df["MACD_SIGNAL"] = macd.macd_signal()
 
             latest = df.iloc[-1]
-            # === Volatility Check ===
-            df["volatility"] = df["close"].rolling(window=10).std()
-            if df["volatility"].iloc[-1] < 0.002 * latest["close"]:
-                print(f"[⚠️ {symbol}] Rejected: low volatility")
-                continue
-            # === Breakout Check ===
-            recent_high = df["close"].rolling(window=15).max().iloc[-1]
-            if latest["close"] < recent_high * 0.98:
-                print(f"[📉 {symbol}] No breakout above recent high")
-                continue
             support = round(find_last_local_min(df), 8)
             resistance = round(find_last_local_max(df), 8)
             print(f"[🔍 {symbol}] Support={support}, Resistance={resistance}")
