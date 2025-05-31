@@ -91,7 +91,7 @@ for _, row in signal_data.iterrows():
     cols[11].markdown(f"📌 *{row['Advice']}*")
     cols[12].markdown(f"📊 {volume_status} Volume**")
     chart = generate_scalping_chart(df_history, row["Symbol"])
-    cols[13].image("data:image/png;base64," + chart, use_column_width=True)
+    cols[13].image("data:image/png;base64," + chart, width=320)
 
 # Ready to Trade Panel
 st.subheader("✅ Ready to Trade Now (Top Opportunities)")
