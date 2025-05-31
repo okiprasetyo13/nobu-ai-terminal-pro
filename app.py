@@ -7,6 +7,7 @@ from plot_chart import generate_expert_chart
 from websocket_client import start_websocket_client
 from ready_to_trade import get_ready_to_trade_data
 from websocket_client import launch_websocket_thread
+from plot_chart import generate_scalping_chart
 
 def get_volume_label(volume, volume_avg):
     return "🟢 High" if volume > volume_avg else "🔴 Low"
