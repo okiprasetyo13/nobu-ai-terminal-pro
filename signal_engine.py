@@ -209,6 +209,7 @@ def generate_all_signals():
             'Buy Price': 106500,
             'Support': 105000,
             'Resistance': 108500,
+            'Current Price': 106500,
             'Signal': 'Buy',
             'RSI': 35,
             'EMA9': 106400,
