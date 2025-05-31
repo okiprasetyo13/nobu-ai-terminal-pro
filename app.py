@@ -91,7 +91,11 @@ for _, row in signal_data.iterrows():
     cols[11].markdown(f"📌 *{row['Advice']}*")
     cols[12].markdown(f"📊 {volume_status} Volume**")
     chart = generate_scalping_chart(df_history, row["Symbol"])
-    chart_size = st.selectbox("Chart Size", ["Small", "Medium", "Large"])
+    chart_size = st.selectbox(
+    	"Chart Size",
+    	["Small", "Medium", "Large"],
+        key=f"chart_size_{row['Symbol']}"
+    )
     chart_width = 280 if chart_size == "Small" else 360 if chart_size == "Medium" else 480
     st.image("data:image/png;base64," + chart, width=chart_width)
 
