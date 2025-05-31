@@ -1,3 +1,4 @@
+import random
 import pandas as pd
 import numpy as np
 from ta.momentum import RSIIndicator
@@ -151,49 +152,47 @@ symbol_list = [
 
 def generate_all_signals():
     import pandas as pd
+    import random
 
     signal_rows = []
 
-    # ✅ 20 coins manually listed for test
     symbol_list = [
         'BTC', 'ETH', 'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
         'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
     ]
 
     for symbol in symbol_list:
-        print(f"[CHECKING] {symbol} - Generating signal...")
-
         try:
-            # Dummy price data for now
-            price_history = [106000 + i * 50 for i in range(10)]
+            # Generate a base price per symbol
+            base_price = random.randint(10000, 60000)
+            price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
 
             row = {
                 'Symbol': symbol,
                 'Strategy': 'Scalping',
-                'Score': 4,
-                'Buy Price': 106500,
-                'Take Profit': 108000,
-                'Stop Loss': 105000,
-                'Support': 105000,
-                'Resistance': 108500,
-                'Current Price': 106500,
+                'Score': random.randint(3, 5),
+                'Buy Price': base_price,
+                'Take Profit': base_price + 500,
+                'Stop Loss': base_price - 500,
+                'Support': base_price - 300,
+                'Resistance': base_price + 700,
+                'Current Price': base_price,
                 'Signal': 'Buy',
-                'RSI': 35,
-                'EMA9': 106400,
-                'EMA21': 106200,
-                'Volume': 50000000,
+                'RSI': round(random.uniform(25, 40), 2),
+                'EMA9': base_price - 50,
+                'EMA21': base_price - 100,
+                'Volume': random.randint(1000000, 50000000),
                 'Advice': 'Buy on support',
                 'Trade Type': 'Scalping',
                 'Price History': price_history,
             }
 
             signal_rows.append(row)
-            print(f"[RESULT] ✅ {symbol} added to signal list.")
+            print(f"[✅] Signal added for {symbol}")
 
         except Exception as e:
-            print(f"[ERROR] ❌ {symbol} failed: {e}")
+            print(f"[❌] Error processing {symbol}: {e}")
 
-    print(f"[SUMMARY] Generated {len(signal_rows)} signals.")
     return pd.DataFrame(signal_rows)
     
     # === Dynamic Filtering and Ranking Logic ===
