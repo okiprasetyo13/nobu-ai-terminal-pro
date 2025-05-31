@@ -203,14 +203,18 @@ def generate_all_signals():
         print("[⚠️] No valid signals generated.")
         return df
     # ✅ Step 2: Sort by Score
-    df_filtered = df.sort_values(by="Score", ascending=False)
+    df = df.sort_values(by="Score", ascending=False)
     
-    # ✅ Step 3: Prioritize BTC and ETH on top
-    btc_row = df_filtered[df_filtered['Symbol'] == 'BTC']
-    eth_row = df_filtered[df_filtered['Symbol'] == 'ETH']
-    df_filtered = df_filtered[~df_filtered['Symbol'].isin(['BTC', 'ETH'])]
+    # ✅ Step 3: Always include BTC & ETH, even if low score
+    btc_row = df[df["Symbol"] == "BTC"]
+    eth_row = df[df["Symbol"] == "ETH"]
+    df_filtered = df[~df["Symbol"].isin(["BTC", "ETH"])]
     
-    # ✅ Step 4: Concatenate BTC + ETH on top of remaining
+    # ✅ Step 4: Keep only top 18 other coins to limit total to 20
+    df_filtered = df_filtered.head(18)
+    
+    # ✅ Step 5: Combine BTC + ETH + others (always on top)
     df_final = pd.concat([btc_row, eth_row, df_filtered], ignore_index=True)
     
+    print(f"[✅] Final DataFrame contains {len(df_final)} coins.")
     return df_final
