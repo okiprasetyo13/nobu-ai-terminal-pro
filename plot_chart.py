@@ -12,6 +12,7 @@ def generate_mini_chart(prices, support=None, resistance=None):
     """
     fig, ax = plt.subplots(figsize=(3, 1))
     ax.plot(prices, linewidth=1.5)
+    ax.set_ylim(min(prices) * 0.98, max(prices) * 1.02)
 
     # Optional support/resistance lines
     if support:
