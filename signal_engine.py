@@ -6,6 +6,19 @@ from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator, MACD
 from websocket_client import get_latest_price, get_ohlcv_data
 
+def get_m1_ohlcv(symbol):
+    url = f"https://nobu-fastapi-price.onrender.com/ohlcv/{symbol}"
+    try:
+        res = requests.get(url).json()
+        df = pd.DataFrame(res)
+        df["time"] = pd.to_datetime(df["time"], unit="s")
+        df.set_index("time", inplace=True)
+        df.sort_index(inplace=True)
+        return df
+    except Exception as e:
+        print(f"[{symbol}] OHLCV fetch failed: {e}")
+        return pd.DataFrame()
+
 def analyze_symbol(symbol):
     try:
         df = get_ohlcv_data(symbol, limit=50)
