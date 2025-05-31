@@ -46,23 +46,15 @@ for col, header in zip(cols, headers):
     col.markdown(f"**{header}**")
 
 # Rows
+from ta.momentum import RSIIndicator  # ✅ Make sure this is imported at the top
+
+# ✅ Inside signal_data.iterrows loop
 for _, row in signal_data.iterrows():
     cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
     live_price = get_live_price(row["Symbol"])
-    price_display = f"${live_price:.2f}" if live_price else f"${row['Current Price']:.2f}"
+    price_display = f"${live_price:,.2f}" if live_price else f"${row['Current Price']:.2f}"
 
-    cols[0].markdown(f"🌕 {row['Symbol']}")
-    cols[1].markdown(f"`{row['Strategy']}`")
-    cols[2].markdown(f"{row['RSI']:.2f}")
-    cols[3].markdown(f"🧠 {row['Score']}")
-    cols[4].markdown(f"`{row['Signal']}`")
-    cols[5].markdown(price_display)
-    cols[6].markdown(row["Take Profit"])
-    cols[7].markdown(row["Stop Loss"])
-    cols[8].markdown(f"🧱 {row['Resistance']}")
-    cols[9].markdown(f"📌 *{row['Advice']}*")
-
-    # ✅ Expert Chart Preparation
+    # 💡 Safe chart prep inside loop
     df_history = pd.DataFrame(row["Price History"], columns=["close"])
     df_history["open"] = df_history["close"].shift(1).fillna(method="bfill")
     df_history["high"] = df_history["close"] + 5
@@ -73,7 +65,19 @@ for _, row in signal_data.iterrows():
     df_history["RSI"] = RSIIndicator(df_history["close"], window=14).rsi()
     df_history.index = pd.date_range(end=pd.Timestamp.now(), periods=len(df_history), freq="1min")
 
-    # ✅ Generate Chart
+    # ✅ Show expert table with chart
+    cols[0].markdown(f"🪙 {row['Symbol']}")
+    cols[1].markdown(f"`{row['Strategy']}`")
+    cols[2].markdown(f"{row['RSI']:.2f}")
+    cols[3].markdown(f"🧠 {row['Score']}")
+    cols[4].markdown(f"`{row['Signal']}`")
+    cols[5].markdown(price_display)
+    cols[6].markdown(row["Take Profit"])
+    cols[7].markdown(row["Stop Loss"])
+    cols[8].markdown(f"🧱 {row['Resistance']}")
+    cols[9].markdown(f"📌 *{row['Advice']}*")
+
+    # ✅ Generate chart AFTER df_history is ready
     chart = generate_expert_chart(df_history, row["Symbol"])
     cols[10].image("data:image/png;base64," + chart, use_column_width=True)
 
