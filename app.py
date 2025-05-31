@@ -51,6 +51,11 @@ from ta.momentum import RSIIndicator  # ✅ Make sure this is imported at the to
 # ✅ Inside signal_data.iterrows loop
 for _, row in signal_data.iterrows():
     cols = st.columns([1.1, 1.1, 1, 1, 1, 1, 1.3, 1.3, 1.1, 1.1, 1.1, 1.8, 2.5])
+    
+    # ✅ Step 3: Compute volume condition
+    volume = row.get("Volume", 0)
+    volume_avg = row.get("Volume Avg", 0)
+    volume_status = "High" if volume > volume_avg else "Low"
     live_price = get_live_price(row["Symbol"])
     price_display = f"${live_price:,.2f}" if live_price else f"${row['Current Price']:.2f}"
 
