@@ -143,6 +143,7 @@ def generate_all_signals():
             latest = df.iloc[-1]
             support = round(find_last_local_min(df), 8)
             resistance = round(find_last_local_max(df), 8)
+            print(f"[🔍 {symbol}] Support={support}, Resistance={resistance}")
             entry = support * 1.01
             sl = support * 0.985
             tp = resistance
