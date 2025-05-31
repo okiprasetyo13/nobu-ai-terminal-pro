@@ -89,7 +89,7 @@ for _, row in signal_data.iterrows():
     cols[10].markdown(f"🍫 {row['Resistance']}")
     cols[11].markdown(f"📌 *{row['Advice']}*")
     cols[12].markdown(f"📊 {volume_status} Volume**")
-    chart = generate_expert_chart(df_history, row["Symbol"])
+    chart = generate_scalping_chart(df_history, row["Symbol"])
     cols[13].image("data:image/png;base64," + chart, use_column_width=True)
 
 # Ready to Trade Panel
