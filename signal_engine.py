@@ -195,6 +195,7 @@ def generate_all_signals():
 
     return pd.DataFrame(signal_rows)
     
+    
     # === Dynamic Filtering and Ranking Logic ===
     df_filtered = df_result[(df_result['EMA9'] > df_result['EMA21']) & (df_result['Signal'] != 'WAIT')]
     df_filtered = df_filtered.sort_values(by="Volume", ascending=False).head(20)
