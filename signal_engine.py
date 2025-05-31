@@ -164,7 +164,8 @@ def generate_all_signals():
     for symbol in symbol_list:
         try:
             # Generate a base price per symbol
-            base_price = random.randint(10000, 60000)
+            coinbase_symbol = f"{symbol}-USD"
+            base_price = get_latest_price(coinbase_symbol) or random.randint(10000, 60000)
             price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
 
             row = {
