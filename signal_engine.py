@@ -60,10 +60,10 @@ def analyze_symbol(symbol):
             print(f"[⚠️ {symbol}] Rejected: low volatility")
             continue
         # === Breakout Check ===
-recent_high = df["close"].rolling(window=15).max().iloc[-1]
-if latest["close"] < recent_high * 0.98:
-    print(f"[📉 {symbol}] No breakout above recent high")
-    continue
+        recent_high = df["close"].rolling(window=15).max().iloc[-1]
+        if latest["close"] < recent_high * 0.98:
+            print(f"[📉 {symbol}] No breakout above recent high")
+            continue
         price = latest['close']
         rsi = latest['RSI']
         volume = latest['volume']
