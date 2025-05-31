@@ -54,17 +54,6 @@ def analyze_symbol(symbol):
 
         # === Signal Decision Logic ===
         latest = df.iloc[-1]
-        # === Volatility Check ===
-        df["volatility"] = df["close"].rolling(window=10).std()
-        if df["volatility"].iloc[-1] < 0.002 * latest["close"]:
-            print(f"[⚠️ {symbol}] Rejected: low volatility")
-            continue
-        # === Breakout Check ===
-        recent_high = df["close"].rolling(window=15).max().iloc[-1]
-        if latest["close"] < recent_high * 0.98:
-            print(f"[📉 {symbol}] No breakout above recent high")
-            continue
-        
         price = latest['close']
         rsi = latest['RSI']
         volume = latest['volume']
@@ -150,6 +139,18 @@ def generate_all_signals():
             macd = MACD(df["close"])
             df["MACD"] = macd.macd()
             df["MACD_SIGNAL"] = macd.macd_signal()
+            df["volatility"] = df["close"].rolling(window=10).std()
+            
+            # === Volatility Check ===
+            df["volatility"] = df["close"].rolling(window=10).std()
+            if df["volatility"].iloc[-1] < 0.002 * latest["close"]:
+                print(f"[⚠️ {symbol}] Rejected: low volatility")
+                continue
+            # === Breakout Check ===
+            recent_high = df["close"].rolling(window=15).max().iloc[-1]
+            if latest["close"] < recent_high * 0.98:
+                print(f"[📉 {symbol}] No breakout above recent high")
+                continue
 
             latest = df.iloc[-1]
             support = round(find_last_local_min(df), 8)
