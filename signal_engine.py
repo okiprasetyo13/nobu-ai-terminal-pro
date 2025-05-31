@@ -21,7 +21,8 @@ def get_m1_ohlcv(symbol):
 
 def analyze_symbol(symbol):
     try:
-        df = get_ohlcv_data(symbol, limit=50)
+        symbol_id = symbol.replace("-USD", "")
+        df = get_m1_ohlcv(symbol_id)
 
         # === Indicators ===
         df['EMA9'] = EMAIndicator(close=df['close'], window=9).ema_indicator()
