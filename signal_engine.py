@@ -109,7 +109,6 @@ def get_live_price(symbol):
 
 def generate_all_signals():
     signal_rows = []
-
     symbol_list = [
         'BTC', 'ETH', 'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
         'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
@@ -117,33 +116,58 @@ def generate_all_signals():
 
     for symbol in symbol_list:
         try:
-            base_price = get_live_price(symbol)
-            if base_price is None:
+            df = get_m1_ohlcv(symbol)
+            if df is None or df.empty or len(df) < 21:
+                print(f"[❌] Skipping {symbol}: insufficient OHLCV data.")
                 continue
 
-            print(f"[🔄] {symbol} live price = {base_price}")
-            price_history = [base_price + random.randint(-200, 200) for _ in range(10)]
+            df["EMA9"] = EMAIndicator(df["close"], window=9).ema_indicator()
+            df["EMA21"] = EMAIndicator(df["close"], window=21).ema_indicator()
+            df["RSI"] = RSIIndicator(df["close"], window=14).rsi()
+            macd = MACD(df["close"])
+            df["MACD"] = macd.macd()
+            df["MACD_SIGNAL"] = macd.macd_signal()
+
+            latest = df.iloc[-1]
+            support = round(min(df["close"].iloc[-10:]), 8)
+            resistance = round(max(df["close"].iloc[-10:]), 8)
+            entry = support * 1.01
+            sl = support * 0.985
+            tp = resistance
+
+            score = 0
+            if latest["EMA9"] > latest["EMA21"]:
+                score += 1
+            if latest["RSI"] < 30:
+                score += 1
+            elif latest["RSI"] > 70:
+                score -= 1
+            if latest["MACD"] > latest["MACD_SIGNAL"]:
+                score += 1
+            else:
+                score -= 1
+
+            signal = "Buy" if latest["RSI"] < 35 and latest["EMA9"] > latest["EMA21"] else "Wait"
+            advice = "📌 Buy on support" if signal == "Buy" else "Watch for entry"
+            strategy = "Scalping"
 
             row = {
-                'Symbol': symbol,
-                'Strategy': 'Scalping',
-                'Score': random.randint(3, 5),
-                'Buy Price': base_price,
-                'Take Profit': base_price + 500,
-                'Stop Loss': base_price - 500,
-                'Support': base_price - 300,
-                'Resistance': base_price + 700,
-                'Current Price': base_price,
-                'Signal': 'Buy',
-                'RSI': round(random.uniform(25, 40), 2),
-                'EMA9': base_price - 50,
-                'EMA21': base_price - 100,
-                'Volume': random.randint(1000000, 50000000),
-                'Advice': 'Buy on support',
-                'Trade Type': 'Scalping',
-                'Price History': price_history,
+                "Symbol": symbol,
+                "Strategy": strategy,
+                "Score": score,
+                "Signal": signal,
+                "Buy Price": round(entry, 4),
+                "Take Profit": round(tp, 4),
+                "Stop Loss": round(sl, 4),
+                "Support": round(support, 4),
+                "Resistance": round(resistance, 4),
+                "Current Price": round(latest["close"], 4),
+                "RSI": round(latest["RSI"], 2),
+                "EMA9": round(latest["EMA9"], 2),
+                "EMA21": round(latest["EMA21"], 2),
+                "Advice": advice,
+                "Price History": df["close"].tail(30).tolist(),
             }
-
             signal_rows.append(row)
             print(f"[✅] Signal added for {symbol}")
 
@@ -151,5 +175,5 @@ def generate_all_signals():
             print(f"[❌] Error processing {symbol}: {e}")
 
     df = pd.DataFrame(signal_rows)
-    print(f"[📊] Total signals generated: {len(df)}")
+    df = df.sort_values(by="Score", ascending=False).reset_index(drop=True)
     return df
