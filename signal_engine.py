@@ -206,6 +206,8 @@ def generate_all_signals():
                 "RSI": round(latest["RSI"], 2),
                 "EMA9": round(latest["EMA9"], 2),
                 "EMA21": round(latest["EMA21"], 2),
+                "Volume": int(volume),
+                "Volume Status": volume_status,
                 "Advice": advice,
                 "Price History": df["close"].tail(30).tolist(),
             }
