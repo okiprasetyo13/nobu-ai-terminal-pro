@@ -13,7 +13,7 @@ def get_top_coinbase_symbols():
         usd_pairs = [p for p in res if p.get("quote_currency") == "USD" and p.get("status") == "online"]
         sorted_pairs = sorted(usd_pairs, key=lambda x: float(x.get("volume_24h", 0)), reverse=True)
 
-        symbols = ["BTC", "ETH"]
+        symbols = []
         for item in sorted_pairs:
             base = item.get("base_currency")
             if base not in symbols:
@@ -22,9 +22,9 @@ def get_top_coinbase_symbols():
                 break
         return symbols
     except Exception as e:
-        print(f"[❌] Failed to load dynamic symbols: {e}")
+        print(f"[❌] Failed to fetch dynamic symbols: {e}")
         return [
-            'BTC', 'ETH', 'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
+            'SOL', 'APT', 'AVAX', 'OP', 'ARB', 'PEPE', 'DOGE', 'LTC',
             'MATIC', 'SUI', 'INJ', 'LINK', 'RNDR', 'WIF', 'BLUR', 'SHIB', 'TIA', 'JUP'
         ]
 
