@@ -289,6 +289,7 @@ def generate_all_signals():
                 "Stop Loss": round(sl, 4),
                 "Support": round(support, 4),
                 "Resistance": round(resistance, 4),
+                "Support Zone": f"{round(support * 0.99, 4)} - {round(support * 1.01, 4)}",
                 "Current Price": round(latest["close"], 4),
                 "RSI": round(latest["RSI"], 2),
                 "EMA9": round(latest["EMA9"], 2),
