@@ -11,9 +11,6 @@ from plot_chart import generate_yanto_chart
 from websocket_client import get_latest_price
 from ohlcv_data import get_ohlcv
 
-# Auto-refresh every 5 seconds
-st_autorefresh(interval=5000, key="refresh")
-
 st.set_page_config(layout="wide")
 st.title("📡 Nobu AI Terminal Pro – Yanto Bubut Scalping Edition")
 
