@@ -25,5 +25,8 @@ chart_df["EMA9"] = chart_df["Close"].ewm(span=9).mean()
 chart_df["EMA21"] = chart_df["Close"].ewm(span=21).mean()
 
 row = df[df["Symbol"] == selected_symbol].iloc[0]
-chart_base64 = generate_yanto_chart(chart_df, row["Support"], row["SL"], row["TP"], row["Price"])
-st.markdown(f"![chart](data:image/png;base64,{chart_base64})")
+if row["Price"] is not None and row["SL"] is not None and row["TP"] is not None:
+    chart_base64 = generate_yanto_chart(chart_df, row["Support"], row["SL"], row["TP"], row["Price"])
+    st.markdown(f"![chart](data:image/png;base64,{chart_base64})")
+else:
+    st.warning("No valid buy signal yet for this coin — chart lines disabled.")
