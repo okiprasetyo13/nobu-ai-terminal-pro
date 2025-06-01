@@ -1,10 +1,11 @@
-# app.py — Cleaned header using live WebSocket price and public OHLCV
+# ✅ These two lines must be at the VERY top of app.py
 import streamlit as st
-st.set_page_config(layout="wide")  # ✅ must be first Streamlit command
+st.set_page_config(layout="wide")
 
-# ✅ 5-second auto-refresh via HTML tag (no external package required)
+# ✅ HTML auto-refresh (safe, no extra packages)
 st.markdown("<meta http-equiv='refresh' content='5'>", unsafe_allow_html=True)
 
+# ✅ Now import other packages
 import pandas as pd
 from signal_engine import generate_all_signals
 from plot_chart import generate_yanto_chart
