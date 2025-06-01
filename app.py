@@ -1,5 +1,10 @@
 # app.py – Final version using live WebSocket price and public OHLCV
 import streamlit as st
+st.set_page_config(layout="wide")
+
+# Force refresh every 5 seconds with HTML meta tag
+st.markdown("<meta http-equiv='refresh' content='5'>", unsafe_allow_html=True)
+
 import pandas as pd
 from signal_engine import generate_all_signals
 from plot_chart import generate_yanto_chart
