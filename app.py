@@ -1,25 +1,28 @@
-# app.py – Using public Coinbase OHLCV and secure live price
+# app.py – Final version using live WebSocket price and public OHLCV
 import streamlit as st
 import pandas as pd
 from signal_engine import generate_all_signals
 from plot_chart import generate_yanto_chart
-from websocket_client import get_latest_price  # Secure live price from WebSocket
-from ohlcv_data import get_ohlcv  # Public OHLCV fetch
+from websocket_client import get_latest_price
+from ohlcv_data import get_ohlcv
+from streamlit_autorefresh import st_autorefresh
+
+# Auto-refresh every 5 seconds
+st_autorefresh(interval=5000, key="refresh")
 
 st.set_page_config(layout="wide")
 st.title("📡 Nobu AI Terminal Pro – Yanto Bubut Scalping Edition")
 
-# Top 10 coins
-coins = ['BTC-USD', 'ETH-USD', 'PEPE-USD', 'DOGE-USD', 'ADA-USD', 'SOL-USD', 'AVAX-USD', 'LINK-USD', 'MATIC-USD', 'OP-USD']
+# 10 target coins
+coins = ['BTC-USD', 'ETH-USD', 'PEPE-USD', 'DOGE-USD', 'ADA-USD',
+         'SOL-USD', 'AVAX-USD', 'LINK-USD', 'MATIC-USD', 'OP-USD']
 
-# Generate signals with real live price
+# Generate signals using real-time price
 df = generate_all_signals(coins)
 st.dataframe(df)
 
-# Select coin to view chart
+# Coin chart section
 selected_symbol = st.selectbox("Select a coin to view chart:", df["Symbol"])
-
-# Use public OHLCV from Coinbase
 try:
     chart_df = get_ohlcv(selected_symbol, granularity=60)
     chart_df["EMA9"] = chart_df["close"].ewm(span=9).mean()
