@@ -1,126 +1,29 @@
+# app.py (Production - Nobu AI Terminal Pro + Yanto Bubut Patch)
 import streamlit as st
 import pandas as pd
-import requests
-from ta.momentum import RSIIndicator
 from signal_engine import generate_all_signals
-from plot_chart import generate_expert_chart
-from websocket_client import start_websocket_client
-from ready_to_trade import get_ready_to_trade_data
-from websocket_client import launch_websocket_thread
-from plot_chart import generate_scalping_chart
+from plot_chart import generate_yanto_chart
 
-def get_volume_label(volume, volume_avg):
-    return "🟢 High" if volume > volume_avg else "🔴 Low"
+st.set_page_config(layout="wide")
+st.title("📡 Nobu AI Terminal Pro – Yanto Bubut Scalping Edition")
 
-launch_websocket_thread()
-print("[⚡] WebSocket thread launched")
+coins = ['BTC', 'ETH', 'PEPE', 'DOGE', 'ADA', 'SOL', 'AVAX', 'LINK', 'MATIC', 'OP']
 
-st.set_page_config(page_title="Nobu AI Terminal Pro v0.2", layout="wide")
+def price_fetcher(symbol):
+    import random
+    return round(random.uniform(0.000001, 200), 8)
 
-# Start WebSocket client in the background
-start_websocket_client()
+df = generate_all_signals(coins, price_fetcher)
+st.dataframe(df)
 
-st.title("📡 Nobu AI Terminal Pro – Expert Scalping Terminal v0.2")
+selected_symbol = st.selectbox("Select a coin to view chart:", df["Symbol"])
+chart_df = pd.DataFrame({
+    "Time": pd.date_range(end=pd.Timestamp.now(), periods=60, freq='min'),
+    "Close": [price_fetcher(selected_symbol) for _ in range(60)],
+})
+chart_df["EMA9"] = chart_df["Close"].ewm(span=9).mean()
+chart_df["EMA21"] = chart_df["Close"].ewm(span=21).mean()
 
-# === Live FastAPI Price Fetcher ===
-@st.cache_data(ttl=5)
-def get_live_price(symbol):
-    try:
-        url = f"https://nobu-fastapi-price.onrender.com/price/{symbol}"
-        res = requests.get(url).json()
-        return float(res["price"])
-    except:
-        return None
-
-# Live Scalping Signal Table
-st.subheader("📈 Live Scalping Signal Table (Real-Time)")
-signal_data = generate_all_signals()
-
-# 🧠 Expert One-Glance Signal Table
-st.subheader("📊 Expert Signal Table (One-Glance View)")
-
-# Headers
-cols = st.columns([1.1, 1.1, 1.1, 1, 1, 1.3, 1.3, 1.1, 1.1, 1.2, 1.8, 2.5, 2.5])
-headers = [
-    "Symbol", "Strategy", "RSI", "Volume", "Score", "Signal",
-    "Price", "Recommended Buy", "TP", "SL", "Support Zone",
-    "Resistance", "Advice", "Chart"
-]
-for col, header in zip(cols, headers):
-    col.markdown(f"**{header}**")
-
-# Rows
-from ta.momentum import RSIIndicator  # ✅ Make sure this is imported at the top
-
-# ✅ Inside signal_data.iterrows loop
-for _, row in signal_data.iterrows():
-    cols = st.columns([1.1, 1.1, 1, 1, 1, 1.3, 1.1, 1.1, 1.1, 1.1, 1.3, 1.1, 1.8, 2.5])
-#                ─────────────────────────────────────────────── ↑ must match exactly 14 columns
-    
-    # ✅ Step 3: Compute volume condition
-    volume = row.get("Volume", 0)
-    volume_avg = row.get("Volume Avg", 0)
-    volume_status = "🟢 High" if volume > volume_avg else "🔴 Low"
-    live_price = get_live_price(row["Symbol"])
-    price_display = f"${live_price:,.2f}" if live_price else f"${row['Current Price']:.2f}"
-
-    # 💡 Safe chart prep inside loop
-    df_history = pd.DataFrame(row["Price History"], columns=["close"])
-    df_history["open"] = df_history["close"].shift(1).fillna(method="bfill")
-    df_history["high"] = df_history["close"] + 5
-    df_history["low"] = df_history["close"] - 5
-    df_history["volume"] = 10000
-    df_history["EMA9"] = df_history["close"].ewm(span=9).mean()
-    df_history["EMA21"] = df_history["close"].ewm(span=21).mean()
-    df_history["RSI"] = RSIIndicator(df_history["close"], window=14).rsi()
-    df_history.index = pd.date_range(end=pd.Timestamp.now(), periods=len(df_history), freq="1min")
-
-    # ✅ Show expert table with chart
-    cols[0].markdown(f"🪙 {row['Symbol']}")
-    cols[1].markdown(f"`{row['Strategy']}`")
-    cols[2].markdown(f"{row['RSI']:.2f}")
-    cols[3].markdown(f"🧠 {row['Score']}")
-    cols[4].markdown(f"`{row['Signal']}`")
-    cols[5].markdown(price_display)
-    cols[6].markdown(f"${row['Recommended Buy']}")
-    
-    cols[7].markdown(row["Take Profit"])
-    cols[8].markdown(row["Stop Loss"])
-    cols[9].markdown(f"{row['Support Zone']}")                     # ✅ NEW
-    cols[10].markdown(f"🍫 {row['Resistance']}")
-    cols[11].markdown(f"📌 *{row['Advice']}*")
-    cols[12].markdown(f"📊 {volume_status} Volume**")
-    # ✅ Collapsible chart for this row
-with st.expander(f"📈 Show chart for {row['Symbol']}", expanded=False):
-    chart_size = st.selectbox(
-        "Chart Size",
-        ["Small", "Medium", "Large"],
-        index=1,  # 👈 Default = Medium
-        key=f"chart_size_{row['Symbol']}"
-    )
-
-    # Set chart width
-    width = 260
-    if chart_size == "Medium":
-        width = 360
-    elif chart_size == "Large":
-        width = 480
-
-    chart = generate_scalping_chart(df_history, row["Symbol"])
-    st.image("data:image/png;base64," + chart, width=width)
-    
-    # Generate and show chart below the row
-    chart = generate_scalping_chart(df_history, row["Symbol"])
-    st.image("data:image/png;base64," + chart, width=width)
-
-# Ready to Trade Panel
-st.subheader("✅ Ready to Trade Now (Top Opportunities)")
-ready_data = get_ready_to_trade_data()
-if not ready_data.empty:
-    st.dataframe(ready_data, use_container_width=True)
-else:
-    st.info("No ready-to-trade coins identified at this time.")
-
-# Footer
-st.markdown("---")
-st.caption("Nobu AI Terminal Pro v0.2 – Tested and Verified • Built for Real Scalping Profits ⚡")
+row = df[df["Symbol"] == selected_symbol].iloc[0]
+chart_base64 = generate_yanto_chart(chart_df, row["Support"], row["SL"], row["TP"], row["Price"])
+st.markdown(f"![chart](data:image/png;base64,{chart_base64})")
