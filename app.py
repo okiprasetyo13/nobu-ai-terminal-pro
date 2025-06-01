@@ -1,8 +1,8 @@
-# app.py – Final version using live WebSocket price and public OHLCV
+# app.py — Cleaned header using live WebSocket price and public OHLCV
 import streamlit as st
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide")  # ✅ must be first Streamlit command
 
-# Force refresh every 5 seconds with HTML meta tag
+# ✅ 5-second auto-refresh via HTML tag (no external package required)
 st.markdown("<meta http-equiv='refresh' content='5'>", unsafe_allow_html=True)
 
 import pandas as pd
@@ -10,7 +10,6 @@ from signal_engine import generate_all_signals
 from plot_chart import generate_yanto_chart
 from websocket_client import get_latest_price
 from ohlcv_data import get_ohlcv
-from streamlit_autorefresh import st_autorefresh
 
 # Auto-refresh every 5 seconds
 st_autorefresh(interval=5000, key="refresh")
